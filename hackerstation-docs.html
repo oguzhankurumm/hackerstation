@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HackerStation AI System — Local 8GB Optimized Architecture</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --bg-2: #0f1620;
+    --bg-3: #131c28;
+    --panel: #111923;
+    --border: #1f2a3a;
+    --text: #d6e1ee;
+    --muted: #8a9bb1;
+    --accent: #5ce0a3;
+    --accent-2: #8ab4ff;
+    --warn: #f5c060;
+    --danger: #ff7c7c;
+    --code-bg: #0a1019;
+    --kbd-bg: #1a2433;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+  body {
+    font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+  nav.side {
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 20px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  nav.side h1 {
+    font-size: 14px;
+    margin: 0 0 4px 0;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  nav.side .sub {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 22px;
+  }
+  nav.side ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: navc;
+  }
+  nav.side ol li {
+    counter-increment: navc;
+    margin: 6px 0;
+  }
+  nav.side ol li a {
+    display: block;
+    color: var(--text);
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13.5px;
+    border: 1px solid transparent;
+  }
+  nav.side ol li a:hover {
+    background: var(--bg-3);
+    border-color: var(--border);
+  }
+  nav.side ol li a::before {
+    content: counter(navc) ". ";
+    color: var(--muted);
+  }
+  main {
+    max-width: 920px;
+    padding: 56px 56px 120px 56px;
+  }
+  header.hero {
+    margin-bottom: 56px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+  }
+  header.hero h1 {
+    font-size: 30px;
+    margin: 0 0 10px 0;
+    line-height: 1.2;
+  }
+  header.hero h1 .accent { color: var(--accent); }
+  header.hero p.tag {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0;
+  }
+  .meta {
+    display: flex;
+    gap: 18px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .pill .dot {
+    display: inline-block;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .pill.warn .dot { background: var(--warn); }
+  .pill.danger .dot { background: var(--danger); }
+
+  section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  section h2 {
+    font-size: 22px;
+    margin: 0 0 18px 0;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  section h3 {
+    font-size: 16px;
+    margin: 28px 0 10px 0;
+    color: var(--accent-2);
+  }
+  p { color: var(--text); }
+  ul, ol { padding-left: 20px; }
+  li { margin: 6px 0; }
+  code, kbd, pre, .mono {
+    font-family: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code",
+                 "Roboto Mono", Consolas, monospace;
+  }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 13.5px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    color: var(--accent-2);
+    font-weight: 600;
+    background: var(--bg-2);
+  }
+  tr:hover td { background: var(--bg-2); }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin: 14px 0;
+  }
+  .panel.note { border-left: 3px solid var(--accent-2); }
+  .panel.warn { border-left: 3px solid var(--warn); }
+  .panel.danger { border-left: 3px solid var(--danger); }
+  .panel h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent-2);
+  }
+  .panel.warn h4 { color: var(--warn); }
+  .panel.danger h4 { color: var(--danger); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 980px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.side { position: static; height: auto; border-right: none;
+               border-bottom: 1px solid var(--border); }
+    main { padding: 32px 24px 80px 24px; }
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+  .ascii {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-size: 12px;
+    color: var(--accent);
+    white-space: pre;
+    line-height: 1.35;
+  }
+  .endpoint {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--accent-2);
+  }
+  .method-get    { color: #87cf87; font-weight: 700; }
+  .method-post   { color: #ffb761; font-weight: 700; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  footer {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 64px;
+    border-top: 1px solid var(--border);
+    padding-top: 18px;
+  }
+  .key { color: var(--accent-2); }
+  .val { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="side" aria-label="Table of contents">
+    <h1>HackerStation</h1>
+    <div class="sub">v2.0 — self-healing build</div>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#self-healing">Self-healing system</a></li>
+      <li><a href="#install">Installation &amp; startup</a></li>
+      <li><a href="#usage">Usage examples</a></li>
+      <li><a href="#failures">Failure handling</a></li>
+      <li><a href="#best-practices">Best practices</a></li>
+      <li><a href="#api">API reference</a></li>
+      <li><a href="#config">Tuning &amp; config</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <h1><span class="accent">HackerStation</span> AI System
+        <br />Local 8GB Optimized Architecture</h1>
+      <p class="tag">Self-healing local AI router with memory-aware runtime,
+        auto-repair loop, and graceful degradation under pressure.</p>
+      <div class="meta">
+        <span class="pill"><span class="dot"></span> 100% local · zero cloud</span>
+        <span class="pill"><span class="dot"></span> Apple M3 · 8GB · Metal 4</span>
+        <span class="pill"><span class="dot"></span> stdlib-only Python</span>
+        <span class="pill warn"><span class="dot"></span> stability &gt; performance</span>
+      </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <section id="overview">
+      <h2>1 · Overview</h2>
+      <p>HackerStation is an offline AI workstation tuned for an 8GB Apple Silicon
+         box. Two specialised local models sit behind a thin Python router that
+         classifies each request and forwards it to the right model — with a
+         supervisor watching the whole stack, ready to restart, fall back, or
+         throttle when pressure builds.</p>
+
+      <h3>Models</h3>
+      <table>
+        <thead>
+          <tr><th>Role</th><th>Model</th><th>Built from</th><th>Use case</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="key">coding</span></td>
+            <td><code>hackerstation-code</code></td>
+            <td><code>qwen3:8b</code></td>
+            <td>Scripts, exploits, payloads, tool development</td>
+          </tr>
+          <tr>
+            <td><span class="key">reasoning</span></td>
+            <td><code>hackerstation-reason</code></td>
+            <td><code>deepseek-r1:8b</code></td>
+            <td>Threat modelling, attack planning, analysis</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Architecture diagram</h3>
+      <div class="ascii">
+┌───────────────────────────────────────────────────────────────────────┐
+│                       APPLE M3 · 8GB · METAL 4                        │
+│                                                                       │
+│   ┌────────────┐     ┌─────────────────────────────────────────┐      │
+│   │  Client    │ ──▶ │           supervisor.py                 │      │
+│   │  (curl,    │     │   • crash-loop protection               │      │
+│   │   warp,    │     │   • restarts router on death            │      │
+│   │   IDE)     │     │   • host-level memory probe             │      │
+│   └────────────┘     └────────────────┬────────────────────────┘      │
+│                                       │ spawn / restart               │
+│                                       ▼                               │
+│                ┌──────────────────────────────────────────────┐       │
+│                │              router.py  :8080                │       │
+│                │   ┌────────────────────────────────────┐     │       │
+│                │   │  classify(prompt) → coding / reason│     │       │
+│                │   ├────────────────────────────────────┤     │       │
+│                │   │  watchdog thread (5s tick)         │     │       │
+│                │   │     ↳ memory_probe.snapshot()      │     │       │
+│                │   │     ↳ should_enter_safe_mode()     │     │       │
+│                │   │     ↳ should_exit_safe_mode()      │     │       │
+│                │   ├────────────────────────────────────┤     │       │
+│                │   │  Semaphore(1)  ← 1 gen at a time   │     │       │
+│                │   ├────────────────────────────────────┤     │       │
+│                │   │  fallback chain:                   │     │       │
+│                │   │     reason → code → deterministic  │     │       │
+│                │   └────────────────────────────────────┘     │       │
+│                └────────────────┬─────────────────────────────┘       │
+│                                 │ HTTP                                │
+│                                 ▼                                     │
+│                     ┌──────────────────────┐                          │
+│                     │   Ollama  :11434     │                          │
+│                     │  ┌────────────────┐  │                          │
+│                     │  │ qwen3:8b       │  │  one model loaded        │
+│                     │  ├────────────────┤  │  at a time (auto-unload) │
+│                     │  │ deepseek-r1:8b │  │                          │
+│                     │  └────────────────┘  │                          │
+│                     └──────────────────────┘                          │
+│                                                                       │
+│   logs/self-heal.log  ←  every restart, fallback, SAFE-MODE toggle    │
+└───────────────────────────────────────────────────────────────────────┘
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <section id="how-it-works">
+      <h2>2 · How it works</h2>
+
+      <h3>Routing logic</h3>
+      <p>The router uses two compiled regex sets to score the prompt for
+         coding-flavoured vs reasoning-flavoured keywords. Higher score wins;
+         on tie, the lighter coding model is chosen.</p>
+      <pre><code>coding_score    = len(CODING_PATTERNS.findall(prompt))
+reasoning_score = len(REASONING_PATTERNS.findall(prompt))
+
+if coding_score &gt; reasoning_score:    return "coding"
+if reasoning_score &gt; coding_score:    return "reasoning"
+return "coding"   # tie → cheaper model</code></pre>
+
+      <p>Force-routing is available via dedicated endpoints:</p>
+      <ul>
+        <li><span class="endpoint"><span class="method-post">POST</span> /generate/coding</span> — always coding model</li>
+        <li><span class="endpoint"><span class="method-post">POST</span> /generate/reasoning</span> — always reasoning model</li>
+        <li><span class="endpoint"><span class="method-post">POST</span> /generate</span> — auto-route</li>
+      </ul>
+
+      <h3>Memory-constraint design</h3>
+      <p>Every choice in the router exists because of the 8GB limit:</p>
+      <ul>
+        <li><strong>One in-flight generation</strong> — a <code>Semaphore(1)</code> keeps
+            two heavy inferences from colliding and OOM-killing the box.</li>
+        <li><strong>Reduced context window</strong> — <code>num_ctx=4096</code> normally,
+            <code>2048</code> in SAFE MODE.</li>
+        <li><strong>Capped output tokens</strong> — <code>num_predict=1024</code> normally,
+            <code>256</code> in SAFE MODE.</li>
+        <li><strong>Model auto-unload</strong> — Ollama swaps the inactive model out of
+            VRAM when the active one switches.</li>
+        <li><strong>No third-party dependencies</strong> — every pip install is RAM
+            you can no longer use for inference.</li>
+      </ul>
+
+      <h3>The 8GB system prompt</h3>
+      <p>This block is appended to <em>every</em> system prompt sent to either model:</p>
+      <pre><code>You are running on a low-memory environment (8GB RAM).
+
+Rules:
+- prioritize stability over performance
+- minimize reasoning depth
+- avoid long outputs unless requested
+- reduce context usage aggressively
+- degrade gracefully under load
+- prefer structured short answers
+- if overloaded: reduce output length immediately</code></pre>
+      <p>When SAFE MODE activates, an additional suffix is appended that
+         caps the response at ~120 tokens and disables chain-of-thought.</p>
+    </section>
+
+    <!-- ===================================================================== -->
+    <section id="self-healing">
+      <h2>3 · Self-healing system</h2>
+      <p>Self-healing happens at <strong>two layers</strong>:</p>
+
+      <div class="grid-2">
+        <div class="panel note">
+          <h4>In-process · router.py</h4>
+          <ul>
+            <li>Watchdog thread (5s tick)</li>
+            <li>SAFE MODE toggle</li>
+            <li>Concurrency semaphore</li>
+            <li>Per-call retry (3 attempts)</li>
+            <li>Fallback chain</li>
+          </ul>
+        </div>
+        <div class="panel note">
+          <h4>Out-of-process · supervisor.py</h4>
+          <ul>
+            <li>Health-check loop (10s tick)</li>
+            <li>Spawns / respawns router</li>
+            <li>Crash-loop backoff</li>
+            <li>Kills stuck PIDs on :8080</li>
+            <li>Waits for Ollama on boot</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Watchdog signals</h3>
+      <p>Every 5 seconds the in-process watchdog refreshes:</p>
+      <table>
+        <thead><tr><th>Signal</th><th>Source</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Host RAM %</td>
+            <td><code>vm_stat</code> on macOS, <code>/proc/meminfo</code> on Linux</td>
+            <td>SAFE MODE entry / exit</td>
+          </tr>
+          <tr>
+            <td>Avg generation latency</td>
+            <td>Rolling window of last 20 requests</td>
+            <td>Latency-spike detection</td>
+          </tr>
+          <tr>
+            <td>Recent error count</td>
+            <td>Errors in last 60s</td>
+            <td>SAFE MODE entry</td>
+          </tr>
+          <tr>
+            <td>Ollama liveness</td>
+            <td><code>GET /api/tags</code> (2s timeout)</td>
+            <td>Supervisor restart trigger</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Auto-repair rules</h3>
+      <ol>
+        <li><strong>Restart router</strong> — supervisor detects dead router after
+            <code>3 × 10s</code> failed health checks.</li>
+        <li><strong>Kill stuck PIDs</strong> — <code>lsof -ti tcp:8080</code> →
+            <code>SIGTERM</code> then <code>SIGKILL</code>.</li>
+        <li><strong>Retry Ollama</strong> — 3 attempts, 4s apart, before giving up.</li>
+        <li><strong>Fallback model</strong> — if reasoning model errors, retry on
+            coding model with same prompt + system prompt.</li>
+        <li><strong>Deterministic stub</strong> — both models down → return a
+            structured "service degraded" response so callers don't see HTTP errors.</li>
+        <li><strong>Crash-loop backoff</strong> — &gt;5 restarts in 120s →
+            exponential wait (5s × 2ⁿ, capped at 5min).</li>
+      </ol>
+
+      <h3>SAFE MODE behaviour</h3>
+      <p>When SAFE MODE is active, the router automatically:</p>
+      <ul>
+        <li>Reduces <code>num_ctx</code> from 4096 → 2048</li>
+        <li>Caps <code>num_predict</code> at 256</li>
+        <li>Drops temperature from 0.7 → 0.5</li>
+        <li>Shortens Ollama timeout from 300s → 120s</li>
+        <li>Appends a SAFE-MODE suffix to the system prompt</li>
+        <li>Rejects requests with <code>503</code> if RAM &gt; 95% (critical)</li>
+      </ul>
+
+      <h3>Self-heal log</h3>
+      <p>Every recovery action is appended to <code>logs/self-heal.log</code>
+         in a structured, grep-able format:</p>
+      <pre><code>[2026-04-15T08:12:03Z] event=safe_mode_entered memory_pct=89.4 avg_latency=12.1 errors_60s=0
+[2026-04-15T08:13:11Z] event=ollama_retry model=hackerstation-reason attempt=1 err=Connection refused
+[2026-04-15T08:13:13Z] event=ollama_retry model=hackerstation-reason attempt=2 err=Connection refused
+[2026-04-15T08:13:17Z] event=fallback_to_coding from_model=hackerstation-reason reason=Connection refused
+[2026-04-15T08:14:02Z] event=safe_mode_exited memory_pct=71.2
+[2026-04-15T08:21:44Z] event=router_health_fail consecutive=3 threshold=3
+[2026-04-15T08:21:45Z] event=killed_stuck_pid pid=88410
+[2026-04-15T08:21:48Z] event=router_spawned pid=88491 port=8080</code></pre>
+    </section>
+
+    <!-- ===================================================================== -->
+    <section id="install">
+      <h2>4 · Installation &amp; startup</h2>
+
+      <h3>Prerequisites</h3>
+      <ul>
+        <li>macOS (Apple Silicon) or Linux</li>
+        <li>Python 3.10+</li>
+        <li>Ollama installed and on <code>$PATH</code></li>
+        <li>(optional) Docker for the security lab targets</li>
+      </ul>
+
+      <h3>1. Pull base models &amp; build the personalities</h3>
+      <pre><code># pull base models (≈10GB total — done once)
+ollama pull qwen3:8b
+ollama pull deepseek-r1:8b
+
+# build the HackerStation variants from the Modelfiles
+ollama create hackerstation-code   -f Modelfile.qwen-hacker
+ollama create hackerstation-reason -f Modelfile.deepseek-hacker</code></pre>
+
+      <h3>2. Start the stack</h3>
+      <pre><code># start Ollama + router + supervisor
+./start.sh
+
+# individually
+./start.sh ollama       # just the model backend
+./start.sh router       # just the router (no auto-restart)
+./start.sh supervisor   # spawn the self-healing watcher
+./start.sh status       # health snapshot
+./start.sh stop         # stop supervisor + router cleanly</code></pre>
+
+      <div class="panel note">
+        <h4>Why start the supervisor last?</h4>
+        <p>If the supervisor is already running and it sees the router is up,
+           it does nothing. If the router dies, the supervisor spawns it.
+           Always stop the supervisor <em>before</em> the router, or it will
+           helpfully respawn the router you're trying to kill.</p>
+      </div>
+
+      <h3>3. Verify</h3>
+      <pre><code>curl -s http://localhost:8080/health | python3 -m json.tool
+# {
+#   "status": "ok",
+#   "models": { "coding": "hackerstation-code", "reasoning": "hackerstation-reason" },
+#   "safe_mode": false,
+#   "memory_percent": 76.2,
+#   "ollama_alive": true,
+#   "avg_latency_sec": 0.0,
+#   "errors_60s": 0
+# }</code></pre>
+    </section>
+
+    <!-- ===================================================================== -->
+    <section id="usage">
+      <h2>5 · Usage examples</h2>
+
+      <h3>Coding task — auto-routed to <code>hackerstation-code</code></h3>
+      <pre><code>curl -s -X POST http://localhost:8080/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Write a Python TCP port scanner with concurrency limit 50"}' \
+  | python3 -m json.tool</code></pre>
+
+      <h3>Reasoning task — auto-routed to <code>hackerstation-reason</code></h3>
+      <pre><code>curl -s -X POST http://localhost:8080/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Analyze the kill chain for a phishing campaign targeting a SaaS company. List MITRE ATT&CK technique IDs."}' \
+  | python3 -m json.tool</code></pre>
+
+      <h3>Security tool simulation</h3>
+      <pre><code>curl -s -X POST http://localhost:8080/generate/coding \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Generate a sqlmap command for testing the DVWA login form at http://localhost:4280/login.php with security level low"}' \
+  | python3 -m json.tool</code></pre>
+
+      <h3>Debugging request</h3>
+      <pre><code>curl -s -X POST http://localhost:8080/chat \
+  -H "Content-Type: application/json" \
+  -d '{"messages": [
+        {"role": "user", "content": "My nuclei scan returns 0 results against http://localhost:3000 but the site responds. Walk me through the diagnosis."}
+      ]}' \
+  | python3 -m json.tool</code></pre>
+
+      <h3>Inspect runtime state</h3>
+      <pre><code>curl -s http://localhost:8080/status | python3 -m json.tool
+
+# Live tail of recovery events
+tail -f logs/self-heal.log</code></pre>
+    </section>
+
+    <!-- ===================================================================== -->
+    <section id="failures">
+      <h2>6 · Failure handling examples</h2>
+
+      <div class="panel warn">
+        <h4>Memory overload</h4>
+        <p><strong>What you'll see:</strong> latency climbs, then the router starts
+           returning shorter answers, then <code>/health</code> shows
+           <code>"safe_mode": true</code>.</p>
+        <p><strong>What's happening:</strong> the watchdog tripped
+           <code>should_enter_safe_mode()</code> because RAM crossed 88%.
+           <code>num_predict</code> dropped to 256 and the SAFE-MODE suffix is
+           glued onto the system prompt. New requests will be capped until RAM
+           drops below 75% for at least 30s of dwell.</p>
+        <p><strong>If RAM hits 95%:</strong> new requests get a
+           <code>503 memory_critical</code> response — the router refuses to
+           start work it cannot safely finish.</p>
+      </div>
+
+      <div class="panel warn">
+        <h4>Ollama crashes</h4>
+        <p><strong>What you'll see:</strong> first request to either model returns
+           a fallback response with <code>"_router.fell_back": true</code>; if
+           both models are unreachable, you get the deterministic stub:</p>
+<pre><code>{
+  "response": "[SERVICE DEGRADED] HackerStation router could not reach any model. ...",
+  "model": "deterministic-stub",
+  "_router": {"degraded": true, ...}
+}</code></pre>
+        <p><strong>Recovery:</strong> the next request will retry Ollama 3× with
+           backoff. Restart Ollama with <code>brew services restart ollama</code>
+           or <code>./start.sh ollama</code>.</p>
+      </div>
+
+      <div class="panel danger">
+        <h4>Router stops responding</h4>
+        <p><strong>What you'll see:</strong> <code>curl :8080/health</code> hangs
+           or refuses connection.</p>
+        <p><strong>What happens automatically:</strong> the supervisor's
+           <code>router_alive()</code> check fails 3 times in a row, it kills any
+           stuck PID on port 8080 (<code>SIGTERM</code> → <code>SIGKILL</code>),
+           waits for Ollama, and respawns the router. The whole sequence is
+           logged to <code>logs/self-heal.log</code>.</p>
+        <p><strong>Crash-loop guard:</strong> if the router dies more than 5
+           times in 120 seconds, the supervisor backs off exponentially
+           (5s · 2ⁿ, max 5 min) so it doesn't burn the CPU on a permanently
+           broken build.</p>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <section id="best-practices">
+      <h2>7 · Best practices</h2>
+
+      <h3>To keep the box stable on 8GB</h3>
+      <ul>
+        <li>Use the auto-router (<code>/generate</code>) — it picks the lighter
+            model on ambiguous prompts.</li>
+        <li>Keep the docker lab <em>off</em> while doing heavy AI work
+            (<code>docker compose down</code>).</li>
+        <li>Close other RAM-hungry apps (browsers with many tabs, Slack, IDEs
+            with language servers).</li>
+        <li>Watch <code>./start.sh status</code> when latency feels off.</li>
+        <li>Tail the self-heal log when iterating on prompts:
+            <code>tail -f logs/self-heal.log</code>.</li>
+        <li>Prefer <code>num_ctx ≤ 4096</code>. Larger context inflates KV-cache
+            RAM linearly.</li>
+      </ul>
+
+      <h3>What NOT to do</h3>
+      <ul>
+        <li>Don't run two <code>POST /generate</code> calls in parallel — they'll
+            queue on the semaphore anyway, but you'll spike RAM during model
+            swap.</li>
+        <li>Don't disable the supervisor and leave the router running unattended;
+            you lose crash recovery.</li>
+        <li>Don't tighten the SAFE MODE thresholds aggressively
+            (e.g. enter at 70%, exit at 68%) — the router will flap.</li>
+        <li>Don't add heavyweight Python deps (<code>torch</code>, <code>transformers</code>)
+            to <code>router.py</code>. Every MB loaded steals from inference.</li>
+        <li>Don't <code>kill -9</code> the router while the supervisor is up —
+            stop the supervisor first or it will respawn instantly.</li>
+      </ul>
+    </section>
+
+    <!-- ===================================================================== -->
+    <section id="api">
+      <h2>8 · API reference</h2>
+      <table>
+        <thead>
+          <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="method-post">POST</span></td>
+              <td><code>/generate</code></td>
+              <td>Auto-route by classifier; full fallback chain</td></tr>
+          <tr><td><span class="method-post">POST</span></td>
+              <td><code>/chat</code></td>
+              <td>Auto-route, multi-turn (messages array)</td></tr>
+          <tr><td><span class="method-post">POST</span></td>
+              <td><code>/generate/coding</code></td>
+              <td>Force coding model</td></tr>
+          <tr><td><span class="method-post">POST</span></td>
+              <td><code>/generate/reasoning</code></td>
+              <td>Force reasoning model</td></tr>
+          <tr><td><span class="method-get">GET</span></td>
+              <td><code>/health</code></td>
+              <td>Quick health snapshot</td></tr>
+          <tr><td><span class="method-get">GET</span></td>
+              <td><code>/status</code></td>
+              <td>Detailed runtime: SAFE MODE, RAM, latency, errors, in-flight</td></tr>
+          <tr><td><span class="method-get">GET</span></td>
+              <td><code>/models</code></td>
+              <td>Pass-through to Ollama <code>/api/tags</code></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Response envelope</h3>
+      <pre><code>{
+  "response": "...",
+  "model": "hackerstation-code",
+  "done": true,
+  "_router": {
+    "task_type": "coding",
+    "model_used": "hackerstation-code",
+    "fell_back": false,
+    "safe_mode": false,
+    "elapsed_seconds": 4.71,
+    "memory_percent": 78.4
+  }
+}</code></pre>
+
+      <h3>Error responses</h3>
+      <table>
+        <thead><tr><th>Status</th><th>Body <code>.error</code></th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>400</code></td><td><code>invalid JSON body</code></td><td>Bad payload</td></tr>
+          <tr><td><code>404</code></td><td><code>Unknown endpoint</code></td><td>Wrong path</td></tr>
+          <tr><td><code>500</code></td><td><code>internal</code></td><td>Unhandled handler exception</td></tr>
+          <tr><td><code>502</code></td><td>varies</td><td>Ollama unreachable on <code>/models</code></td></tr>
+          <tr><td><code>503</code></td><td><code>memory_critical</code></td><td>RAM ≥ 95%, request refused</td></tr>
+          <tr><td><code>503</code></td><td><code>router_busy</code></td><td>Semaphore could not be acquired</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ===================================================================== -->
+    <section id="config">
+      <h2>9 · Tuning &amp; config</h2>
+      <p>All knobs are constants at the top of each module. There is intentionally
+         no config file — fewer moving parts, easier to reason about.</p>
+
+      <table>
+        <thead><tr><th>Constant</th><th>File</th><th>Default</th><th>What it controls</th></tr></thead>
+        <tbody>
+          <tr><td><code>SEMAPHORE_TIMEOUT_SEC</code></td><td>router.py</td>
+              <td>90</td>
+              <td>How long a request waits for the gen lock before 503</td></tr>
+          <tr><td><code>OLLAMA_RETRY_ATTEMPTS</code></td><td>router.py</td>
+              <td>3</td>
+              <td>Per-request retries against Ollama</td></tr>
+          <tr><td><code>OLLAMA_RETRY_DELAY</code></td><td>router.py</td>
+              <td>2.0s</td>
+              <td>Backoff base between retries (multiplied by attempt number)</td></tr>
+          <tr><td>SAFE-MODE entry / exit</td><td>router.py</td>
+              <td>88% / 75%</td>
+              <td>RAM thresholds with hysteresis (see policy block)</td></tr>
+          <tr><td><code>num_ctx</code> / <code>num_predict</code></td><td>router.py</td>
+              <td>4096 / 1024</td>
+              <td>Normal Ollama generation options</td></tr>
+          <tr><td><code>num_ctx</code> / <code>num_predict</code> (SAFE)</td><td>router.py</td>
+              <td>2048 / 256</td>
+              <td>SAFE MODE Ollama options</td></tr>
+          <tr><td><code>CHECK_INTERVAL_SEC</code></td><td>supervisor.py</td>
+              <td>10</td>
+              <td>Health-check tick</td></tr>
+          <tr><td><code>CONSECUTIVE_FAILURES_…</code></td><td>supervisor.py</td>
+              <td>3</td>
+              <td>Failed checks before restart</td></tr>
+          <tr><td><code>MAX_RESTARTS_IN_WINDOW</code></td><td>supervisor.py</td>
+              <td>5 / 120s</td>
+              <td>Crash-loop protection</td></tr>
+          <tr><td><code>BACKOFF_MAX_SEC</code></td><td>supervisor.py</td>
+              <td>300</td>
+              <td>Cap on exponential backoff</td></tr>
+        </tbody>
+      </table>
+
+      <div class="panel note">
+        <h4>The policy block</h4>
+        <p><code>should_enter_safe_mode()</code> and
+           <code>should_exit_safe_mode()</code> in <code>router.py</code> are the
+           two functions you'll most likely want to tune. They are deliberately
+           separated to enable hysteresis and prevent flapping. Edit, restart
+           the router (the supervisor will respawn it on the same PID slot), and
+           watch <code>logs/self-heal.log</code> to see the effect.</p>
+      </div>
+    </section>
+
+    <footer>
+      <p>HackerStation AI Workstation · v2.0 self-healing build ·
+         8GB · Apple M3 · Metal 4 · Fully offline · Zero cloud dependencies</p>
+    </footer>
+  </main>
+</div>
+</body>
+</html>

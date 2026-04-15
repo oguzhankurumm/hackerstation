@@ -1,0 +1,107 @@
+# HackerStation Security Research Lab
+# Isolated Docker network for safe offensive testing
+#
+# Usage:
+#   docker compose up -d          # Start all services
+#   docker compose up -d juiceshop # Start only Juice Shop
+#   docker compose down           # Stop all
+#   docker compose logs -f        # Watch logs
+#
+# All services are on an isolated bridge network (hacklab)
+# with NO external port exposure except to localhost.
+
+services:
+  # ──────────────────────────────────────────
+  # OWASP Juice Shop - Modern vulnerable web app
+  # Covers: XSS, SQLi, CSRF, SSRF, XXE, etc.
+  # URL: http://localhost:3000
+  # ──────────────────────────────────────────
+  juiceshop:
+    image: bkimminich/juice-shop:latest
+    container_name: hacklab-juiceshop
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+    mem_limit: 512m
+    networks:
+      - hacklab
+    environment:
+      - NODE_ENV=unsafe
+
+  # ──────────────────────────────────────────
+  # DVWA - Damn Vulnerable Web Application
+  # Classic PHP vulnerabilities
+  # URL: http://localhost:4280
+  # Default creds: admin / password
+  # ──────────────────────────────────────────
+  dvwa:
+    image: vulnerables/web-dvwa:latest
+    container_name: hacklab-dvwa
+    ports:
+      - "127.0.0.1:4280:80"
+    restart: unless-stopped
+    mem_limit: 256m
+    networks:
+      - hacklab
+    depends_on:
+      - dvwa-db
+
+  dvwa-db:
+    image: mariadb:10
+    container_name: hacklab-dvwa-db
+    environment:
+      MYSQL_ROOT_PASSWORD: dvwa_root_pass
+      MYSQL_DATABASE: dvwa
+      MYSQL_USER: dvwa
+      MYSQL_PASSWORD: dvwa_pass
+    volumes:
+      - dvwa-db-data:/var/lib/mysql
+    mem_limit: 256m
+    networks:
+      - hacklab
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────
+  # Metasploit Framework
+  # Full MSF console in a container
+  # Access: docker exec -it hacklab-msf msfconsole
+  # ──────────────────────────────────────────
+  metasploit:
+    image: metasploitframework/metasploit-framework:latest
+    container_name: hacklab-msf
+    stdin_open: true
+    tty: true
+    networks:
+      - hacklab
+    mem_limit: 1g
+    restart: unless-stopped
+    # No ports exposed — access via docker exec
+
+  # ──────────────────────────────────────────
+  # WebGoat - OWASP teaching platform
+  # URL: http://localhost:8888/WebGoat
+  # ──────────────────────────────────────────
+  webgoat:
+    image: webgoat/webgoat:latest
+    container_name: hacklab-webgoat
+    ports:
+      - "127.0.0.1:8888:8080"
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+    mem_limit: 512m
+    networks:
+      - hacklab
+    environment:
+      WEBGOAT_PORT: 8080
+      WEBWOLF_PORT: 9090
+
+networks:
+  hacklab:
+    driver: bridge
+    internal: false  # Allow outbound for package installs during container init
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  dvwa-db-data:
