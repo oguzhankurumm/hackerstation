@@ -55,7 +55,7 @@ start_router() {
     log "AI Router already running on :8080"
   else
     info "Starting AI Router on :8080..."
-    nohup python3 "$DIR/router.py" > "$DIR/router.log" 2>&1 &
+    nohup python3 "$DIR/router.py" >> "$DIR/router.log" 2>&1 &
     sleep 2
     if curl -s http://localhost:8080/health >/dev/null 2>&1; then
       log "AI Router started (PID: $!)"

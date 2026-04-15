@@ -123,6 +123,7 @@ def spawn_router() -> subprocess.Popen | None:
     if not wait_for_ollama():
         log("router_start_blocked", reason="ollama_down")
         return None
+    f = None
     try:
         f = ROUTER_LOG.open("a")
         proc = subprocess.Popen(
@@ -131,11 +132,16 @@ def spawn_router() -> subprocess.Popen | None:
             cwd=str(ROOT),
             start_new_session=True,
         )
+        f.close()  # parent no longer needs the fd; child has its own copy
+        f = None
         log("router_spawned", pid=proc.pid, port=ROUTER_PORT)
         return proc
     except OSError as e:
         log("router_spawn_failed", error=str(e))
         return None
+    finally:
+        if f is not None:
+            f.close()
 
 
 def memory_pressure_label() -> str:

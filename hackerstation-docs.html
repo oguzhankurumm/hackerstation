@@ -735,6 +735,7 @@ tail -f logs/self-heal.log</code></pre>
         <tbody>
           <tr><td><code>400</code></td><td><code>invalid JSON body</code></td><td>Bad payload</td></tr>
           <tr><td><code>404</code></td><td><code>Unknown endpoint</code></td><td>Wrong path</td></tr>
+          <tr><td><code>413</code></td><td><code>body_too_large</code></td><td>Request body &gt; 1 MB (OOM guard)</td></tr>
           <tr><td><code>500</code></td><td><code>internal</code></td><td>Unhandled handler exception</td></tr>
           <tr><td><code>502</code></td><td>varies</td><td>Ollama unreachable on <code>/models</code></td></tr>
           <tr><td><code>503</code></td><td><code>memory_critical</code></td><td>RAM ≥ 95%, request refused</td></tr>
@@ -752,6 +753,9 @@ tail -f logs/self-heal.log</code></pre>
       <table>
         <thead><tr><th>Constant</th><th>File</th><th>Default</th><th>What it controls</th></tr></thead>
         <tbody>
+          <tr><td><code>MAX_BODY_SIZE</code></td><td>router.py</td>
+              <td>1 MB</td>
+              <td>Max POST body accepted (OOM protection on 8GB)</td></tr>
           <tr><td><code>SEMAPHORE_TIMEOUT_SEC</code></td><td>router.py</td>
               <td>90</td>
               <td>How long a request waits for the gen lock before 503</td></tr>
