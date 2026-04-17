@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>HackerStation AI System — Local 8GB Optimized Architecture</title>
+<title>HackerStation AI Sistemi — Yerel 8GB Optimize Edilmiş Mimari</title>
 <style>
   :root {
     --bg: #0b0f14;
@@ -256,76 +256,76 @@
 <div class="layout">
   <nav class="side" aria-label="Table of contents">
     <h1>HackerStation</h1>
-    <div class="sub">v2.0 — self-healing build</div>
+    <div class="sub">v2.0 — kendini onaran yapı</div>
     <ol>
-      <li><a href="#overview">Overview</a></li>
-      <li><a href="#how-it-works">How it works</a></li>
-      <li><a href="#self-healing">Self-healing system</a></li>
-      <li><a href="#install">Installation &amp; startup</a></li>
-      <li><a href="#usage">Usage examples</a></li>
-      <li><a href="#failures">Failure handling</a></li>
-      <li><a href="#best-practices">Best practices</a></li>
-      <li><a href="#api">API reference</a></li>
-      <li><a href="#config">Tuning &amp; config</a></li>
+      <li><a href="#overview">Genel Bakış</a></li>
+      <li><a href="#how-it-works">Nasıl Çalışır</a></li>
+      <li><a href="#self-healing">Kendini Onarma Sistemi</a></li>
+      <li><a href="#install">Kurulum ve Başlatma</a></li>
+      <li><a href="#usage">Kullanım Örnekleri</a></li>
+      <li><a href="#failures">Hata Yönetimi</a></li>
+      <li><a href="#best-practices">En İyi Uygulamalar</a></li>
+      <li><a href="#api">API Referansı</a></li>
+      <li><a href="#config">Ayarlama ve Yapılandırma</a></li>
     </ol>
   </nav>
 
   <main>
     <header class="hero">
-      <h1><span class="accent">HackerStation</span> AI System
-        <br />Local 8GB Optimized Architecture</h1>
-      <p class="tag">Self-healing local AI router with memory-aware runtime,
-        auto-repair loop, and graceful degradation under pressure.</p>
+      <h1><span class="accent">HackerStation</span> AI Sistemi
+        <br />Yerel 8GB Optimize Edilmiş Mimari</h1>
+      <p class="tag">Bellek farkındalıklı çalışma zamanı, otomatik onarım döngüsü
+        ve baskı altında zarif bozulma özellikli kendini onaran yerel AI yönlendirici.</p>
       <div class="meta">
-        <span class="pill"><span class="dot"></span> 100% local · zero cloud</span>
+        <span class="pill"><span class="dot"></span> %100 yerel · sıfır bulut</span>
         <span class="pill"><span class="dot"></span> Apple M3 · 8GB · Metal 4</span>
-        <span class="pill"><span class="dot"></span> stdlib-only Python</span>
-        <span class="pill warn"><span class="dot"></span> stability &gt; performance</span>
+        <span class="pill"><span class="dot"></span> yalnızca stdlib Python</span>
+        <span class="pill warn"><span class="dot"></span> kararlılık &gt; performans</span>
       </div>
     </header>
 
     <!-- ===================================================================== -->
     <section id="overview">
-      <h2>1 · Overview</h2>
-      <p>HackerStation is an offline AI workstation tuned for an 8GB Apple Silicon
-         box. Two specialised local models sit behind a thin Python router that
-         classifies each request and forwards it to the right model — with a
-         supervisor watching the whole stack, ready to restart, fall back, or
-         throttle when pressure builds.</p>
+      <h2>1 · Genel Bakış</h2>
+      <p>HackerStation, 8GB Apple Silicon makine için optimize edilmiş çevrimdışı
+         bir AI iş istasyonudur. İki özelleştirilmiş yerel model, her isteği sınıflandıran
+         ve doğru modele yönlendiren ince bir Python yönlendiricinin arkasında bulunur —
+         tüm sistemi izleyen bir gözetleyici, baskı arttığında yeniden başlatmaya,
+         yedek modele geçmeye veya kısmaya hazırdır.</p>
 
-      <h3>Models</h3>
+      <h3>Modeller</h3>
       <table>
         <thead>
-          <tr><th>Role</th><th>Model</th><th>Built from</th><th>Use case</th></tr>
+          <tr><th>Rol</th><th>Model</th><th>Temel Alınan</th><th>Kullanım Alanı</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td><span class="key">coding</span></td>
+            <td><span class="key">kodlama</span></td>
             <td><code>hackerstation-code</code></td>
             <td><code>qwen3:8b</code></td>
-            <td>Scripts, exploits, payloads, tool development</td>
+            <td>Scriptler, exploit'ler, payload'lar, araç geliştirme</td>
           </tr>
           <tr>
-            <td><span class="key">reasoning</span></td>
+            <td><span class="key">muhakeme</span></td>
             <td><code>hackerstation-reason</code></td>
             <td><code>deepseek-r1:8b</code></td>
-            <td>Threat modelling, attack planning, analysis</td>
+            <td>Tehdit modelleme, saldırı planlama, analiz</td>
           </tr>
         </tbody>
       </table>
 
-      <h3>Architecture diagram</h3>
+      <h3>Mimari diyagramı</h3>
       <div class="ascii">
 ┌───────────────────────────────────────────────────────────────────────┐
 │                       APPLE M3 · 8GB · METAL 4                        │
 │                                                                       │
 │   ┌────────────┐     ┌─────────────────────────────────────────┐      │
-│   │  Client    │ ──▶ │           supervisor.py                 │      │
-│   │  (curl,    │     │   • crash-loop protection               │      │
-│   │   warp,    │     │   • restarts router on death            │      │
-│   │   IDE)     │     │   • host-level memory probe             │      │
+│   │  İstemci   │ ──▶ │           supervisor.py                 │      │
+│   │  (curl,    │     │   • çökme döngüsü koruması              │      │
+│   │   warp,    │     │   • ölümde yönlendiriciyi yeniden başlatır│     │
+│   │   IDE)     │     │   • ana makine bellek denetimi           │      │
 │   └────────────┘     └────────────────┬────────────────────────┘      │
-│                                       │ spawn / restart               │
+│                                       │ oluştur / yeniden başlat      │
 │                                       ▼                               │
 │                ┌──────────────────────────────────────────────┐       │
 │                │              router.py  :8080                │       │
@@ -348,155 +348,155 @@
 │                     ┌──────────────────────┐                          │
 │                     │   Ollama  :11434     │                          │
 │                     │  ┌────────────────┐  │                          │
-│                     │  │ qwen3:8b       │  │  one model loaded        │
-│                     │  ├────────────────┤  │  at a time (auto-unload) │
+│                     │  │ qwen3:8b       │  │  aynı anda tek model     │
+│                     │  ├────────────────┤  │  yüklü (otomatik boşalt) │
 │                     │  │ deepseek-r1:8b │  │                          │
 │                     │  └────────────────┘  │                          │
 │                     └──────────────────────┘                          │
 │                                                                       │
-│   logs/self-heal.log  ←  every restart, fallback, SAFE-MODE toggle    │
+│   logs/self-heal.log  ←  her yeniden başlatma, yedekleme, GÜVENLİ MOD │
 └───────────────────────────────────────────────────────────────────────┘
       </div>
     </section>
 
     <!-- ===================================================================== -->
     <section id="how-it-works">
-      <h2>2 · How it works</h2>
+      <h2>2 · Nasıl Çalışır</h2>
 
-      <h3>Routing logic</h3>
-      <p>The router uses two compiled regex sets to score the prompt for
-         coding-flavoured vs reasoning-flavoured keywords. Higher score wins;
-         on tie, the lighter coding model is chosen.</p>
+      <h3>Yönlendirme mantığı</h3>
+      <p>Yönlendirici, istemi kodlama odaklı ve muhakeme odaklı anahtar kelimeler
+         için puanlamak üzere iki derlenmiş regex seti kullanır. Yüksek puan kazanır;
+         beraberlikte daha hafif kodlama modeli seçilir.</p>
       <pre><code>coding_score    = len(CODING_PATTERNS.findall(prompt))
 reasoning_score = len(REASONING_PATTERNS.findall(prompt))
 
 if coding_score &gt; reasoning_score:    return "coding"
 if reasoning_score &gt; coding_score:    return "reasoning"
-return "coding"   # tie → cheaper model</code></pre>
+return "coding"   # beraberlik → daha hafif model</code></pre>
 
-      <p>Force-routing is available via dedicated endpoints:</p>
+      <p>Özel uç noktalar üzerinden zorla yönlendirme yapılabilir:</p>
       <ul>
-        <li><span class="endpoint"><span class="method-post">POST</span> /generate/coding</span> — always coding model</li>
-        <li><span class="endpoint"><span class="method-post">POST</span> /generate/reasoning</span> — always reasoning model</li>
-        <li><span class="endpoint"><span class="method-post">POST</span> /generate</span> — auto-route</li>
+        <li><span class="endpoint"><span class="method-post">POST</span> /generate/coding</span> — her zaman kodlama modeli</li>
+        <li><span class="endpoint"><span class="method-post">POST</span> /generate/reasoning</span> — her zaman muhakeme modeli</li>
+        <li><span class="endpoint"><span class="method-post">POST</span> /generate</span> — otomatik yönlendirme</li>
       </ul>
 
-      <h3>Memory-constraint design</h3>
-      <p>Every choice in the router exists because of the 8GB limit:</p>
+      <h3>Bellek kısıtlı tasarım</h3>
+      <p>Yönlendiricideki her seçim 8GB sınırı nedeniyle vardır:</p>
       <ul>
-        <li><strong>One in-flight generation</strong> — a <code>Semaphore(1)</code> keeps
-            two heavy inferences from colliding and OOM-killing the box.</li>
-        <li><strong>Reduced context window</strong> — <code>num_ctx=4096</code> normally,
-            <code>2048</code> in SAFE MODE.</li>
-        <li><strong>Capped output tokens</strong> — <code>num_predict=1024</code> normally,
-            <code>256</code> in SAFE MODE.</li>
-        <li><strong>Model auto-unload</strong> — Ollama swaps the inactive model out of
-            VRAM when the active one switches.</li>
-        <li><strong>No third-party dependencies</strong> — every pip install is RAM
-            you can no longer use for inference.</li>
+        <li><strong>Tek eşzamanlı üretim</strong> — <code>Semaphore(1)</code>, iki ağır
+            çıkarımın çarpışmasını ve makineyi OOM ile öldürmesini engeller.</li>
+        <li><strong>Azaltılmış bağlam penceresi</strong> — normalde <code>num_ctx=4096</code>,
+            GÜVENLİ MOD'da <code>2048</code>.</li>
+        <li><strong>Sınırlandırılmış çıktı token'ları</strong> — normalde <code>num_predict=1024</code>,
+            GÜVENLİ MOD'da <code>256</code>.</li>
+        <li><strong>Otomatik model boşaltma</strong> — Ollama, aktif model değiştiğinde
+            pasif modeli VRAM'den çıkarır.</li>
+        <li><strong>Üçüncü parti bağımlılık yok</strong> — her pip install,
+            çıkarım için artık kullanamayacağınız RAM demektir.</li>
       </ul>
 
-      <h3>The 8GB system prompt</h3>
-      <p>This block is appended to <em>every</em> system prompt sent to either model:</p>
-      <pre><code>You are running on a low-memory environment (8GB RAM).
+      <h3>8GB sistem istemi</h3>
+      <p>Bu blok, her iki modele gönderilen <em>her</em> sistem istemine eklenir:</p>
+      <pre><code>Düşük bellekli bir ortamda çalışıyorsun (8GB RAM).
 
-Rules:
-- prioritize stability over performance
-- minimize reasoning depth
-- avoid long outputs unless requested
-- reduce context usage aggressively
-- degrade gracefully under load
-- prefer structured short answers
-- if overloaded: reduce output length immediately</code></pre>
-      <p>When SAFE MODE activates, an additional suffix is appended that
-         caps the response at ~120 tokens and disables chain-of-thought.</p>
+Kurallar:
+- kararlılığı performansa tercih et
+- muhakeme derinliğini en aza indir
+- istenmedikçe uzun çıktılardan kaçın
+- bağlam kullanımını agresif şekilde azalt
+- yük altında zarif şekilde bozul
+- yapılandırılmış kısa cevapları tercih et
+- aşırı yüklenmede: çıktı uzunluğunu hemen azalt</code></pre>
+      <p>GÜVENLİ MOD etkinleştiğinde, yanıtı ~120 token ile sınırlayan
+         ve düşünce zincirini devre dışı bırakan ek bir son ek eklenir.</p>
     </section>
 
     <!-- ===================================================================== -->
     <section id="self-healing">
-      <h2>3 · Self-healing system</h2>
-      <p>Self-healing happens at <strong>two layers</strong>:</p>
+      <h2>3 · Kendini Onarma Sistemi</h2>
+      <p>Kendini onarma <strong>iki katmanda</strong> gerçekleşir:</p>
 
       <div class="grid-2">
         <div class="panel note">
-          <h4>In-process · router.py</h4>
+          <h4>Süreç içi · router.py</h4>
           <ul>
-            <li>Watchdog thread (5s tick)</li>
-            <li>SAFE MODE toggle</li>
-            <li>Concurrency semaphore</li>
-            <li>Per-call retry (3 attempts)</li>
-            <li>Fallback chain</li>
+            <li>Bekçi iş parçacığı (5sn aralık)</li>
+            <li>GÜVENLİ MOD geçişi</li>
+            <li>Eşzamanlılık semaforu</li>
+            <li>Çağrı başına yeniden deneme (3 deneme)</li>
+            <li>Yedek zincir</li>
           </ul>
         </div>
         <div class="panel note">
-          <h4>Out-of-process · supervisor.py</h4>
+          <h4>Süreç dışı · supervisor.py</h4>
           <ul>
-            <li>Health-check loop (10s tick)</li>
-            <li>Spawns / respawns router</li>
-            <li>Crash-loop backoff</li>
-            <li>Kills stuck PIDs on :8080</li>
-            <li>Waits for Ollama on boot</li>
+            <li>Sağlık kontrolü döngüsü (10sn aralık)</li>
+            <li>Yönlendiriciyi oluşturur / yeniden başlatır</li>
+            <li>Çökme döngüsü geri çekilmesi</li>
+            <li>:8080'deki takılı PID'leri sonlandırır</li>
+            <li>Başlangıçta Ollama'yı bekler</li>
           </ul>
         </div>
       </div>
 
-      <h3>Watchdog signals</h3>
-      <p>Every 5 seconds the in-process watchdog refreshes:</p>
+      <h3>Bekçi sinyalleri</h3>
+      <p>Süreç içi bekçi her 5 saniyede bir güncellenir:</p>
       <table>
-        <thead><tr><th>Signal</th><th>Source</th><th>Used for</th></tr></thead>
+        <thead><tr><th>Sinyal</th><th>Kaynak</th><th>Kullanım Amacı</th></tr></thead>
         <tbody>
           <tr>
-            <td>Host RAM %</td>
-            <td><code>vm_stat</code> on macOS, <code>/proc/meminfo</code> on Linux</td>
-            <td>SAFE MODE entry / exit</td>
+            <td>Ana makine RAM %</td>
+            <td>macOS'ta <code>vm_stat</code>, Linux'ta <code>/proc/meminfo</code></td>
+            <td>GÜVENLİ MOD giriş / çıkış</td>
           </tr>
           <tr>
-            <td>Avg generation latency</td>
-            <td>Rolling window of last 20 requests</td>
-            <td>Latency-spike detection</td>
+            <td>Ortalama üretim gecikmesi</td>
+            <td>Son 20 isteğin kayar penceresi</td>
+            <td>Gecikme artışı tespiti</td>
           </tr>
           <tr>
-            <td>Recent error count</td>
-            <td>Errors in last 60s</td>
-            <td>SAFE MODE entry</td>
+            <td>Son hata sayısı</td>
+            <td>Son 60 saniyedeki hatalar</td>
+            <td>GÜVENLİ MOD girişi</td>
           </tr>
           <tr>
-            <td>Ollama liveness</td>
-            <td><code>GET /api/tags</code> (2s timeout)</td>
-            <td>Supervisor restart trigger</td>
+            <td>Ollama canlılığı</td>
+            <td><code>GET /api/tags</code> (2sn zaman aşımı)</td>
+            <td>Gözetleyici yeniden başlatma tetikleyicisi</td>
           </tr>
         </tbody>
       </table>
 
-      <h3>Auto-repair rules</h3>
+      <h3>Otomatik onarım kuralları</h3>
       <ol>
-        <li><strong>Restart router</strong> — supervisor detects dead router after
-            <code>3 × 10s</code> failed health checks.</li>
-        <li><strong>Kill stuck PIDs</strong> — <code>lsof -ti tcp:8080</code> →
-            <code>SIGTERM</code> then <code>SIGKILL</code>.</li>
-        <li><strong>Retry Ollama</strong> — 3 attempts, 4s apart, before giving up.</li>
-        <li><strong>Fallback model</strong> — if reasoning model errors, retry on
-            coding model with same prompt + system prompt.</li>
-        <li><strong>Deterministic stub</strong> — both models down → return a
-            structured "service degraded" response so callers don't see HTTP errors.</li>
-        <li><strong>Crash-loop backoff</strong> — &gt;5 restarts in 120s →
-            exponential wait (5s × 2ⁿ, capped at 5min).</li>
+        <li><strong>Yönlendiriciyi yeniden başlat</strong> — gözetleyici,
+            <code>3 × 10sn</code> başarısız sağlık kontrolünden sonra ölü yönlendiriciyi tespit eder.</li>
+        <li><strong>Takılı PID'leri sonlandır</strong> — <code>lsof -ti tcp:8080</code> →
+            <code>SIGTERM</code> ardından <code>SIGKILL</code>.</li>
+        <li><strong>Ollama'yı yeniden dene</strong> — vazgeçmeden önce 4sn arayla 3 deneme.</li>
+        <li><strong>Yedek model</strong> — muhakeme modeli hata verirse, aynı istem +
+            sistem istemi ile kodlama modelinde yeniden dene.</li>
+        <li><strong>Deterministik taslak</strong> — her iki model de çöktüyse →
+            çağıranların HTTP hatası görmemesi için yapılandırılmış "hizmet bozulmuş" yanıtı döndür.</li>
+        <li><strong>Çökme döngüsü geri çekilmesi</strong> — 120sn'de &gt;5 yeniden başlatma →
+            üstel bekleme (5sn × 2ⁿ, maksimum 5dk).</li>
       </ol>
 
-      <h3>SAFE MODE behaviour</h3>
-      <p>When SAFE MODE is active, the router automatically:</p>
+      <h3>GÜVENLİ MOD davranışı</h3>
+      <p>GÜVENLİ MOD etkinken, yönlendirici otomatik olarak:</p>
       <ul>
-        <li>Reduces <code>num_ctx</code> from 4096 → 2048</li>
-        <li>Caps <code>num_predict</code> at 256</li>
-        <li>Drops temperature from 0.7 → 0.5</li>
-        <li>Shortens Ollama timeout from 300s → 120s</li>
-        <li>Appends a SAFE-MODE suffix to the system prompt</li>
-        <li>Rejects requests with <code>503</code> if RAM &gt; 95% (critical)</li>
+        <li><code>num_ctx</code> değerini 4096'dan → 2048'e düşürür</li>
+        <li><code>num_predict</code> değerini 256 ile sınırlar</li>
+        <li>Sıcaklığı 0.7'den → 0.5'e düşürür</li>
+        <li>Ollama zaman aşımını 300sn'den → 120sn'ye kısaltır</li>
+        <li>Sistem istemine GÜVENLİ MOD son eki ekler</li>
+        <li>RAM &gt; %95 ise (kritik) istekleri <code>503</code> ile reddeder</li>
       </ul>
 
-      <h3>Self-heal log</h3>
-      <p>Every recovery action is appended to <code>logs/self-heal.log</code>
-         in a structured, grep-able format:</p>
+      <h3>Kendini onarma günlüğü</h3>
+      <p>Her kurtarma eylemi, yapılandırılmış ve grep ile aranabilir bir formatta
+         <code>logs/self-heal.log</code> dosyasına eklenir:</p>
       <pre><code>[2026-04-15T08:12:03Z] event=safe_mode_entered memory_pct=89.4 avg_latency=12.1 errors_60s=0
 [2026-04-15T08:13:11Z] event=ollama_retry model=hackerstation-reason attempt=1 err=Connection refused
 [2026-04-15T08:13:13Z] event=ollama_retry model=hackerstation-reason attempt=2 err=Connection refused
@@ -509,45 +509,46 @@ Rules:
 
     <!-- ===================================================================== -->
     <section id="install">
-      <h2>4 · Installation &amp; startup</h2>
+      <h2>4 · Kurulum ve Başlatma</h2>
 
-      <h3>Prerequisites</h3>
+      <h3>Ön koşullar</h3>
       <ul>
-        <li>macOS (Apple Silicon) or Linux</li>
+        <li>macOS (Apple Silicon) veya Linux</li>
         <li>Python 3.10+</li>
-        <li>Ollama installed and on <code>$PATH</code></li>
-        <li>(optional) Docker for the security lab targets</li>
+        <li>Ollama kurulu ve <code>$PATH</code> üzerinde</li>
+        <li>(isteğe bağlı) Güvenlik laboratuvarı hedefleri için Docker</li>
       </ul>
 
-      <h3>1. Pull base models &amp; build the personalities</h3>
-      <pre><code># pull base models (≈10GB total — done once)
+      <h3>1. Temel modelleri çek ve kişilikleri oluştur</h3>
+      <pre><code># temel modelleri çek (toplam ≈10GB — bir kez yapılır)
 ollama pull qwen3:8b
 ollama pull deepseek-r1:8b
 
-# build the HackerStation variants from the Modelfiles
+# Modelfile'lardan HackerStation varyantlarını oluştur
 ollama create hackerstation-code   -f Modelfile.qwen-hacker
 ollama create hackerstation-reason -f Modelfile.deepseek-hacker</code></pre>
 
-      <h3>2. Start the stack</h3>
-      <pre><code># start Ollama + router + supervisor
+      <h3>2. Sistemi başlat</h3>
+      <pre><code># Ollama + yönlendirici + gözetleyiciyi başlat
 ./start.sh
 
-# individually
-./start.sh ollama       # just the model backend
-./start.sh router       # just the router (no auto-restart)
-./start.sh supervisor   # spawn the self-healing watcher
-./start.sh status       # health snapshot
-./start.sh stop         # stop supervisor + router cleanly</code></pre>
+# tek tek
+./start.sh ollama       # sadece model arka ucu
+./start.sh router       # sadece yönlendirici (otomatik yeniden başlatma yok)
+./start.sh supervisor   # kendini onaran bekçiyi başlat
+./start.sh status       # sağlık özeti
+./start.sh stop         # gözetleyici + yönlendiriciyi düzgünce durdur</code></pre>
 
       <div class="panel note">
-        <h4>Why start the supervisor last?</h4>
-        <p>If the supervisor is already running and it sees the router is up,
-           it does nothing. If the router dies, the supervisor spawns it.
-           Always stop the supervisor <em>before</em> the router, or it will
-           helpfully respawn the router you're trying to kill.</p>
+        <h4>Gözetleyici neden en son başlatılır?</h4>
+        <p>Gözetleyici zaten çalışıyorsa ve yönlendiricinin ayakta olduğunu görürse,
+           hiçbir şey yapmaz. Yönlendirici ölürse, gözetleyici onu yeniden başlatır.
+           Yönlendiriciyi durdurmadan <em>önce</em> her zaman gözetleyiciyi durdurun,
+           aksi takdirde durdurmaya çalıştığınız yönlendiriciyi yardımseverlikle
+           yeniden başlatır.</p>
       </div>
 
-      <h3>3. Verify</h3>
+      <h3>3. Doğrulama</h3>
       <pre><code>curl -s http://localhost:8080/health | python3 -m json.tool
 # {
 #   "status": "ok",
@@ -562,27 +563,27 @@ ollama create hackerstation-reason -f Modelfile.deepseek-hacker</code></pre>
 
     <!-- ===================================================================== -->
     <section id="usage">
-      <h2>5 · Usage examples</h2>
+      <h2>5 · Kullanım Örnekleri</h2>
 
-      <h3>Coding task — auto-routed to <code>hackerstation-code</code></h3>
+      <h3>Kodlama görevi — otomatik olarak <code>hackerstation-code</code>'a yönlendirilir</h3>
       <pre><code>curl -s -X POST http://localhost:8080/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt": "Write a Python TCP port scanner with concurrency limit 50"}' \
   | python3 -m json.tool</code></pre>
 
-      <h3>Reasoning task — auto-routed to <code>hackerstation-reason</code></h3>
+      <h3>Muhakeme görevi — otomatik olarak <code>hackerstation-reason</code>'a yönlendirilir</h3>
       <pre><code>curl -s -X POST http://localhost:8080/generate \
   -H "Content-Type: application/json" \
   -d '{"prompt": "Analyze the kill chain for a phishing campaign targeting a SaaS company. List MITRE ATT&CK technique IDs."}' \
   | python3 -m json.tool</code></pre>
 
-      <h3>Security tool simulation</h3>
+      <h3>Güvenlik aracı simülasyonu</h3>
       <pre><code>curl -s -X POST http://localhost:8080/generate/coding \
   -H "Content-Type: application/json" \
   -d '{"prompt": "Generate a sqlmap command for testing the DVWA login form at http://localhost:4280/login.php with security level low"}' \
   | python3 -m json.tool</code></pre>
 
-      <h3>Debugging request</h3>
+      <h3>Hata ayıklama isteği</h3>
       <pre><code>curl -s -X POST http://localhost:8080/chat \
   -H "Content-Type: application/json" \
   -d '{"messages": [
@@ -590,131 +591,132 @@ ollama create hackerstation-reason -f Modelfile.deepseek-hacker</code></pre>
       ]}' \
   | python3 -m json.tool</code></pre>
 
-      <h3>Inspect runtime state</h3>
+      <h3>Çalışma zamanı durumunu incele</h3>
       <pre><code>curl -s http://localhost:8080/status | python3 -m json.tool
 
-# Live tail of recovery events
+# Kurtarma olaylarını canlı takip et
 tail -f logs/self-heal.log</code></pre>
     </section>
 
     <!-- ===================================================================== -->
     <section id="failures">
-      <h2>6 · Failure handling examples</h2>
+      <h2>6 · Hata Yönetimi Örnekleri</h2>
 
       <div class="panel warn">
-        <h4>Memory overload</h4>
-        <p><strong>What you'll see:</strong> latency climbs, then the router starts
-           returning shorter answers, then <code>/health</code> shows
-           <code>"safe_mode": true</code>.</p>
-        <p><strong>What's happening:</strong> the watchdog tripped
-           <code>should_enter_safe_mode()</code> because RAM crossed 88%.
-           <code>num_predict</code> dropped to 256 and the SAFE-MODE suffix is
-           glued onto the system prompt. New requests will be capped until RAM
-           drops below 75% for at least 30s of dwell.</p>
-        <p><strong>If RAM hits 95%:</strong> new requests get a
-           <code>503 memory_critical</code> response — the router refuses to
-           start work it cannot safely finish.</p>
+        <h4>Bellek aşırı yüklenmesi</h4>
+        <p><strong>Ne göreceksiniz:</strong> gecikme tırmanır, ardından yönlendirici
+           daha kısa cevaplar döndürmeye başlar, sonra <code>/health</code>
+           <code>"safe_mode": true</code> gösterir.</p>
+        <p><strong>Ne oluyor:</strong> RAM %88'i geçtiği için bekçi
+           <code>should_enter_safe_mode()</code> fonksiyonunu tetikledi.
+           <code>num_predict</code> 256'ya düştü ve GÜVENLİ MOD son eki
+           sistem istemine yapıştırıldı. RAM en az 30sn boyunca %75'in altına
+           düşene kadar yeni istekler sınırlanır.</p>
+        <p><strong>RAM %95'e ulaşırsa:</strong> yeni istekler
+           <code>503 memory_critical</code> yanıtı alır — yönlendirici güvenli
+           şekilde bitiremeyeceği işi başlatmayı reddeder.</p>
       </div>
 
       <div class="panel warn">
-        <h4>Ollama crashes</h4>
-        <p><strong>What you'll see:</strong> first request to either model returns
-           a fallback response with <code>"_router.fell_back": true</code>; if
-           both models are unreachable, you get the deterministic stub:</p>
+        <h4>Ollama çökmesi</h4>
+        <p><strong>Ne göreceksiniz:</strong> her iki modele yapılan ilk istek
+           <code>"_router.fell_back": true</code> içeren bir yedek yanıt döndürür;
+           her iki model de erişilemezse, deterministik taslak alırsınız:</p>
 <pre><code>{
-  "response": "[SERVICE DEGRADED] HackerStation router could not reach any model. ...",
+  "response": "[HİZMET BOZULMUŞ] HackerStation yönlendiricisi hiçbir modele ulaşamadı. ...",
   "model": "deterministic-stub",
   "_router": {"degraded": true, ...}
 }</code></pre>
-        <p><strong>Recovery:</strong> the next request will retry Ollama 3× with
-           backoff. Restart Ollama with <code>brew services restart ollama</code>
-           or <code>./start.sh ollama</code>.</p>
+        <p><strong>Kurtarma:</strong> sonraki istek Ollama'yı geri çekilme ile
+           3 kez yeniden deneyecektir. Ollama'yı <code>brew services restart ollama</code>
+           veya <code>./start.sh ollama</code> ile yeniden başlatın.</p>
       </div>
 
       <div class="panel danger">
-        <h4>Router stops responding</h4>
-        <p><strong>What you'll see:</strong> <code>curl :8080/health</code> hangs
-           or refuses connection.</p>
-        <p><strong>What happens automatically:</strong> the supervisor's
-           <code>router_alive()</code> check fails 3 times in a row, it kills any
-           stuck PID on port 8080 (<code>SIGTERM</code> → <code>SIGKILL</code>),
-           waits for Ollama, and respawns the router. The whole sequence is
-           logged to <code>logs/self-heal.log</code>.</p>
-        <p><strong>Crash-loop guard:</strong> if the router dies more than 5
-           times in 120 seconds, the supervisor backs off exponentially
-           (5s · 2ⁿ, max 5 min) so it doesn't burn the CPU on a permanently
-           broken build.</p>
+        <h4>Yönlendirici yanıt vermeyi durduruyor</h4>
+        <p><strong>Ne göreceksiniz:</strong> <code>curl :8080/health</code> takılır
+           veya bağlantıyı reddeder.</p>
+        <p><strong>Otomatik olarak ne olur:</strong> gözetleyicinin
+           <code>router_alive()</code> kontrolü art arda 3 kez başarısız olur,
+           8080 portundaki takılı PID'leri sonlandırır (<code>SIGTERM</code> → <code>SIGKILL</code>),
+           Ollama'yı bekler ve yönlendiriciyi yeniden başlatır. Tüm süreç
+           <code>logs/self-heal.log</code> dosyasına kaydedilir.</p>
+        <p><strong>Çökme döngüsü koruması:</strong> yönlendirici 120 saniyede
+           5'ten fazla kez ölürse, gözetleyici kalıcı olarak bozuk bir yapıda
+           CPU yakmamak için üstel olarak geri çekilir
+           (5sn · 2ⁿ, maks 5dk).</p>
       </div>
     </section>
 
     <!-- ===================================================================== -->
     <section id="best-practices">
-      <h2>7 · Best practices</h2>
+      <h2>7 · En İyi Uygulamalar</h2>
 
-      <h3>To keep the box stable on 8GB</h3>
+      <h3>8GB'da makineyi kararlı tutmak için</h3>
       <ul>
-        <li>Use the auto-router (<code>/generate</code>) — it picks the lighter
-            model on ambiguous prompts.</li>
-        <li>Keep the docker lab <em>off</em> while doing heavy AI work
+        <li>Otomatik yönlendiriciyi kullanın (<code>/generate</code>) — belirsiz
+            istemlerde daha hafif modeli seçer.</li>
+        <li>Yoğun AI çalışması sırasında docker laboratuvarını <em>kapalı</em> tutun
             (<code>docker compose down</code>).</li>
-        <li>Close other RAM-hungry apps (browsers with many tabs, Slack, IDEs
-            with language servers).</li>
-        <li>Watch <code>./start.sh status</code> when latency feels off.</li>
-        <li>Tail the self-heal log when iterating on prompts:
+        <li>RAM yiyen diğer uygulamaları kapatın (çok sekmeli tarayıcılar, Slack,
+            dil sunuculu IDE'ler).</li>
+        <li>Gecikme garip hissettirdiğinde <code>./start.sh status</code> izleyin.</li>
+        <li>İstemler üzerinde çalışırken kendini onarma günlüğünü takip edin:
             <code>tail -f logs/self-heal.log</code>.</li>
-        <li>Prefer <code>num_ctx ≤ 4096</code>. Larger context inflates KV-cache
-            RAM linearly.</li>
+        <li><code>num_ctx ≤ 4096</code> tercih edin. Daha büyük bağlam,
+            KV-cache RAM'ini doğrusal olarak şişirir.</li>
       </ul>
 
-      <h3>What NOT to do</h3>
+      <h3>Yapılmaması gerekenler</h3>
       <ul>
-        <li>Don't run two <code>POST /generate</code> calls in parallel — they'll
-            queue on the semaphore anyway, but you'll spike RAM during model
-            swap.</li>
-        <li>Don't disable the supervisor and leave the router running unattended;
-            you lose crash recovery.</li>
-        <li>Don't tighten the SAFE MODE thresholds aggressively
-            (e.g. enter at 70%, exit at 68%) — the router will flap.</li>
-        <li>Don't add heavyweight Python deps (<code>torch</code>, <code>transformers</code>)
-            to <code>router.py</code>. Every MB loaded steals from inference.</li>
-        <li>Don't <code>kill -9</code> the router while the supervisor is up —
-            stop the supervisor first or it will respawn instantly.</li>
+        <li>İki <code>POST /generate</code> çağrısını paralel çalıştırmayın —
+            zaten semaforda sıraya girecekler, ama model değişimi sırasında
+            RAM'i patlatırsınız.</li>
+        <li>Gözetleyiciyi devre dışı bırakıp yönlendiriciyi gözetimsiz bırakmayın;
+            çökme kurtarmasını kaybedersiniz.</li>
+        <li>GÜVENLİ MOD eşiklerini agresif şekilde sıkılaştırmayın
+            (örn. %70'te gir, %68'de çık) — yönlendirici salınım yapar.</li>
+        <li><code>router.py</code>'ye ağır Python bağımlılıkları eklemeyin
+            (<code>torch</code>, <code>transformers</code>).
+            Yüklenen her MB, çıkarımdan çalınır.</li>
+        <li>Gözetleyici açıkken yönlendiriciyi <code>kill -9</code> ile öldürmeyin —
+            önce gözetleyiciyi durdurun, yoksa anında yeniden başlatır.</li>
       </ul>
     </section>
 
     <!-- ===================================================================== -->
     <section id="api">
-      <h2>8 · API reference</h2>
+      <h2>8 · API Referansı</h2>
       <table>
         <thead>
-          <tr><th>Method</th><th>Path</th><th>Purpose</th></tr>
+          <tr><th>Metot</th><th>Yol</th><th>Amaç</th></tr>
         </thead>
         <tbody>
           <tr><td><span class="method-post">POST</span></td>
               <td><code>/generate</code></td>
-              <td>Auto-route by classifier; full fallback chain</td></tr>
+              <td>Sınıflandırıcı ile otomatik yönlendirme; tam yedek zincir</td></tr>
           <tr><td><span class="method-post">POST</span></td>
               <td><code>/chat</code></td>
-              <td>Auto-route, multi-turn (messages array)</td></tr>
+              <td>Otomatik yönlendirme, çok turlu (mesajlar dizisi)</td></tr>
           <tr><td><span class="method-post">POST</span></td>
               <td><code>/generate/coding</code></td>
-              <td>Force coding model</td></tr>
+              <td>Kodlama modelini zorla</td></tr>
           <tr><td><span class="method-post">POST</span></td>
               <td><code>/generate/reasoning</code></td>
-              <td>Force reasoning model</td></tr>
+              <td>Muhakeme modelini zorla</td></tr>
           <tr><td><span class="method-get">GET</span></td>
               <td><code>/health</code></td>
-              <td>Quick health snapshot</td></tr>
+              <td>Hızlı sağlık özeti</td></tr>
           <tr><td><span class="method-get">GET</span></td>
               <td><code>/status</code></td>
-              <td>Detailed runtime: SAFE MODE, RAM, latency, errors, in-flight</td></tr>
+              <td>Detaylı çalışma zamanı: GÜVENLİ MOD, RAM, gecikme, hatalar, devam eden</td></tr>
           <tr><td><span class="method-get">GET</span></td>
               <td><code>/models</code></td>
-              <td>Pass-through to Ollama <code>/api/tags</code></td></tr>
+              <td>Ollama <code>/api/tags</code> geçişi</td></tr>
         </tbody>
       </table>
 
-      <h3>Response envelope</h3>
+      <h3>Yanıt zarfı</h3>
       <pre><code>{
   "response": "...",
   "model": "hackerstation-code",
@@ -729,80 +731,80 @@ tail -f logs/self-heal.log</code></pre>
   }
 }</code></pre>
 
-      <h3>Error responses</h3>
+      <h3>Hata yanıtları</h3>
       <table>
-        <thead><tr><th>Status</th><th>Body <code>.error</code></th><th>Meaning</th></tr></thead>
+        <thead><tr><th>Durum</th><th>Gövde <code>.error</code></th><th>Anlamı</th></tr></thead>
         <tbody>
-          <tr><td><code>400</code></td><td><code>invalid JSON body</code></td><td>Bad payload</td></tr>
-          <tr><td><code>404</code></td><td><code>Unknown endpoint</code></td><td>Wrong path</td></tr>
-          <tr><td><code>413</code></td><td><code>body_too_large</code></td><td>Request body &gt; 1 MB (OOM guard)</td></tr>
-          <tr><td><code>500</code></td><td><code>internal</code></td><td>Unhandled handler exception</td></tr>
-          <tr><td><code>502</code></td><td>varies</td><td>Ollama unreachable on <code>/models</code></td></tr>
-          <tr><td><code>503</code></td><td><code>memory_critical</code></td><td>RAM ≥ 95%, request refused</td></tr>
-          <tr><td><code>503</code></td><td><code>router_busy</code></td><td>Semaphore could not be acquired</td></tr>
+          <tr><td><code>400</code></td><td><code>invalid JSON body</code></td><td>Geçersiz veri</td></tr>
+          <tr><td><code>404</code></td><td><code>Unknown endpoint</code></td><td>Yanlış yol</td></tr>
+          <tr><td><code>413</code></td><td><code>body_too_large</code></td><td>İstek gövdesi &gt; 1 MB (OOM koruması)</td></tr>
+          <tr><td><code>500</code></td><td><code>internal</code></td><td>İşlenmeyen işleyici istisnası</td></tr>
+          <tr><td><code>502</code></td><td>değişken</td><td><code>/models</code>'da Ollama erişilemez</td></tr>
+          <tr><td><code>503</code></td><td><code>memory_critical</code></td><td>RAM ≥ %95, istek reddedildi</td></tr>
+          <tr><td><code>503</code></td><td><code>router_busy</code></td><td>Semafor alınamadı</td></tr>
         </tbody>
       </table>
     </section>
 
     <!-- ===================================================================== -->
     <section id="config">
-      <h2>9 · Tuning &amp; config</h2>
-      <p>All knobs are constants at the top of each module. There is intentionally
-         no config file — fewer moving parts, easier to reason about.</p>
+      <h2>9 · Ayarlama ve Yapılandırma</h2>
+      <p>Tüm ayarlar her modülün başındaki sabitlerdir. Bilerek yapılandırma dosyası
+         yoktur — daha az hareketli parça, daha kolay anlaşılabilir.</p>
 
       <table>
-        <thead><tr><th>Constant</th><th>File</th><th>Default</th><th>What it controls</th></tr></thead>
+        <thead><tr><th>Sabit</th><th>Dosya</th><th>Varsayılan</th><th>Ne kontrol eder</th></tr></thead>
         <tbody>
           <tr><td><code>MAX_BODY_SIZE</code></td><td>router.py</td>
               <td>1 MB</td>
-              <td>Max POST body accepted (OOM protection on 8GB)</td></tr>
+              <td>Kabul edilen maks POST gövdesi (8GB'da OOM koruması)</td></tr>
           <tr><td><code>SEMAPHORE_TIMEOUT_SEC</code></td><td>router.py</td>
               <td>90</td>
-              <td>How long a request waits for the gen lock before 503</td></tr>
+              <td>503 öncesi isteğin üretim kilidini ne kadar bekleyeceği</td></tr>
           <tr><td><code>OLLAMA_RETRY_ATTEMPTS</code></td><td>router.py</td>
               <td>3</td>
-              <td>Per-request retries against Ollama</td></tr>
+              <td>Ollama'ya istek başına yeniden deneme sayısı</td></tr>
           <tr><td><code>OLLAMA_RETRY_DELAY</code></td><td>router.py</td>
-              <td>2.0s</td>
-              <td>Backoff base between retries (multiplied by attempt number)</td></tr>
-          <tr><td>SAFE-MODE entry / exit</td><td>router.py</td>
-              <td>88% / 75%</td>
-              <td>RAM thresholds with hysteresis (see policy block)</td></tr>
+              <td>2.0sn</td>
+              <td>Yeniden denemeler arası geri çekilme temeli (deneme sayısıyla çarpılır)</td></tr>
+          <tr><td>GÜVENLİ MOD giriş / çıkış</td><td>router.py</td>
+              <td>%88 / %75</td>
+              <td>Histerezisli RAM eşikleri (politika bloğuna bakın)</td></tr>
           <tr><td><code>num_ctx</code> / <code>num_predict</code></td><td>router.py</td>
               <td>4096 / 1024</td>
-              <td>Normal Ollama generation options</td></tr>
-          <tr><td><code>num_ctx</code> / <code>num_predict</code> (SAFE)</td><td>router.py</td>
+              <td>Normal Ollama üretim seçenekleri</td></tr>
+          <tr><td><code>num_ctx</code> / <code>num_predict</code> (GÜVENLİ)</td><td>router.py</td>
               <td>2048 / 256</td>
-              <td>SAFE MODE Ollama options</td></tr>
+              <td>GÜVENLİ MOD Ollama seçenekleri</td></tr>
           <tr><td><code>CHECK_INTERVAL_SEC</code></td><td>supervisor.py</td>
               <td>10</td>
-              <td>Health-check tick</td></tr>
+              <td>Sağlık kontrolü aralığı</td></tr>
           <tr><td><code>CONSECUTIVE_FAILURES_…</code></td><td>supervisor.py</td>
               <td>3</td>
-              <td>Failed checks before restart</td></tr>
+              <td>Yeniden başlatma öncesi başarısız kontrol sayısı</td></tr>
           <tr><td><code>MAX_RESTARTS_IN_WINDOW</code></td><td>supervisor.py</td>
-              <td>5 / 120s</td>
-              <td>Crash-loop protection</td></tr>
+              <td>5 / 120sn</td>
+              <td>Çökme döngüsü koruması</td></tr>
           <tr><td><code>BACKOFF_MAX_SEC</code></td><td>supervisor.py</td>
               <td>300</td>
-              <td>Cap on exponential backoff</td></tr>
+              <td>Üstel geri çekilme tavanı</td></tr>
         </tbody>
       </table>
 
       <div class="panel note">
-        <h4>The policy block</h4>
-        <p><code>should_enter_safe_mode()</code> and
-           <code>should_exit_safe_mode()</code> in <code>router.py</code> are the
-           two functions you'll most likely want to tune. They are deliberately
-           separated to enable hysteresis and prevent flapping. Edit, restart
-           the router (the supervisor will respawn it on the same PID slot), and
-           watch <code>logs/self-heal.log</code> to see the effect.</p>
+        <h4>Politika bloğu</h4>
+        <p><code>router.py</code> içindeki <code>should_enter_safe_mode()</code> ve
+           <code>should_exit_safe_mode()</code>, büyük olasılıkla ayarlamak
+           isteyeceğiniz iki fonksiyondur. Histerezisi etkinleştirmek ve salınımı
+           önlemek için bilerek ayrılmışlardır. Düzenleyin, yönlendiriciyi yeniden
+           başlatın (gözetleyici aynı PID slotuna yeniden başlatacaktır) ve etkiyi
+           görmek için <code>logs/self-heal.log</code> izleyin.</p>
       </div>
     </section>
 
     <footer>
-      <p>HackerStation AI Workstation · v2.0 self-healing build ·
-         8GB · Apple M3 · Metal 4 · Fully offline · Zero cloud dependencies</p>
+      <p>HackerStation AI İş İstasyonu · v2.0 kendini onaran yapı ·
+         8GB · Apple M3 · Metal 4 · Tamamen çevrimdışı · Sıfır bulut bağımlılığı</p>
     </footer>
   </main>
 </div>

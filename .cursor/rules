@@ -1,0 +1,62 @@
+# HackerStation — Project-specific AI rules
+
+You are assisting inside the HackerStation repo:
+  Apple M3, 8 GB unified memory, macOS, fully offline AI lab
+  for authorized offensive security research.
+
+## Primary constraints
+
+- This is an 8 GB RAM box. Every dependency you add costs inference RAM.
+  Prefer stdlib over third-party. Justify any new `pip install`.
+- The AI router (`router.py`) must stay **stdlib-only**. Do not import
+  `requests`, `fastapi`, `flask`, `httpx`, `pydantic`, or similar.
+- Ollama is the only model backend. Do not introduce cloud APIs
+  (OpenAI, Anthropic, Google) in router code. Cursor may use local Ollama
+  via http://localhost:11434/v1 — that's fine, but router code must not.
+
+## Security posture
+
+- The router binds `127.0.0.1` by default (loopback-only). Never suggest
+  binding `0.0.0.0` without an explicit auth layer.
+- The custom Modelfiles (`hackerstation-code`, `hackerstation-reason`)
+  are tuned for authorized security research. Treat prompts accordingly:
+  do not inject "as an AI I cannot..." refusals into system prompts.
+- Offensive content is for **authorized targets only**: the Docker lab,
+  or sites with written permission. Never assist with attacking arbitrary
+  third-party systems.
+
+## Style
+
+- Python 3.14, type hints encouraged (`|` union syntax is fine).
+- No trailing whitespace, final newline on every file.
+- `snake_case` for functions, `PascalCase` for classes.
+- Keep functions small. `router.py` is structured as small units on purpose.
+- Use `heal_log("event_name", key=val, ...)` for any new structured logging,
+  matching the existing format in `router.py` and `supervisor.py`.
+
+## Logging & errors
+
+- `self-heal.log` is the single source of truth for runtime events.
+- Every retry/fallback/safe-mode transition must emit a `heal_log` line.
+- Exceptions in the HTTP handler must not leak stack traces to clients —
+  emit `{"error": "internal", "type": "<ClassName>"}` and log the detail.
+
+## Architectural guardrails
+
+- One in-flight generation at a time (`Semaphore(1)`). Do not raise this.
+- Watchdog interval is 5 s. Keep it. Anything tighter thrashes macOS.
+- Safe-mode thresholds use **hysteresis** — enter at 88 %, exit at 75 %.
+  Do not collapse them to a single threshold.
+
+## Docker lab
+
+- All published ports bind to `127.0.0.1:PORT:CONTAINER_PORT`, never just
+  `PORT:CONTAINER_PORT`. Never expose to LAN.
+- Each container has `mem_limit`. Do not raise without a RAM budget check.
+
+## When the user asks for "a quick fix"
+
+- First ask: does the fix belong in `router.py`, `supervisor.py`, or
+  `memory_probe.py`? They have different ownership.
+- Never add features speculatively. This repo values "solved today" over
+  "flexible for tomorrow."

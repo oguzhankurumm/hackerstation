@@ -1,0 +1,41 @@
+{
+  "cursor.chat.defaultModel": "hackerstation-code",
+  "cursor.cpp.disabledLanguages": ["plaintext"],
+  "cursor.general.enableShadowWorkspace": false,
+
+  "editor.formatOnSave": false,
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.rulers": [100],
+  "editor.renderWhitespace": "trailing",
+
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    ".git": true
+  },
+  "files.watcherExclude": {
+    "**/logs/**": true,
+    "**/__pycache__/**": true
+  },
+
+  "python.defaultInterpreterPath": "/opt/homebrew/bin/python3",
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.autoImportCompletions": true,
+
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "terminal.integrated.defaultProfile.osx": "zsh",
+  "terminal.integrated.scrollback": 10000,
+
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": "docker-compose*.yml"
+  },
+
+  "search.exclude": {
+    "logs/": true,
+    "recon/": true,
+    "__pycache__/": true
+  }
+}
