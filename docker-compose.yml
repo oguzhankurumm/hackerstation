@@ -1,5 +1,5 @@
 # HackerStation Security Research Lab
-# Isolated Docker network for safe offensive testing
+# Isolated Docker network for safe offensive testing.
 #
 # Usage:
 #   docker compose up -d          # Start all services
@@ -7,13 +7,23 @@
 #   docker compose down           # Stop all
 #   docker compose logs -f        # Watch logs
 #
-# All services are on an isolated bridge network (hacklab)
-# with NO external port exposure except to localhost.
+# Networking model (post-audit 2026-04-15):
+#   - hacklab:         internal:true  → targets cannot reach the internet
+#   - hacklab-egress:  internal:false → only MSF joins this; for module updates
+#
+# Reachability caveat (verified 2026-04-15 smoke test):
+#   The `ports: 127.0.0.1:…` entries below are inert on stock Docker / Docker
+#   Desktop. `internal: true` removes the bridge's host gateway, so Docker's
+#   iptables DNAT for published ports never gets installed. OrbStack routes
+#   to containers via its own tun and `.orb.local` DNS, which IS how you
+#   reach them on this workstation. The `ports:` entries are kept for
+#   documentation + future portability (add a reverse-proxy on a non-internal
+#   bridge if you move off OrbStack).
 
 services:
   # ──────────────────────────────────────────
-  # OWASP Juice Shop - Modern vulnerable web app
-  # Covers: XSS, SQLi, CSRF, SSRF, XXE, etc.
+  # OWASP Juice Shop — modern vulnerable web app.
+  # Covers: XSS, SQLi, CSRF, SSRF, XXE, auth bypass, etc.
   # URL: http://localhost:3000
   # ──────────────────────────────────────────
   juiceshop:
@@ -29,41 +39,25 @@ services:
       - NODE_ENV=unsafe
 
   # ──────────────────────────────────────────
-  # DVWA - Damn Vulnerable Web Application
-  # Classic PHP vulnerabilities
+  # DVWA — Damn Vulnerable Web Application.
+  # The digininja fork is actively maintained and embeds its own DB, so
+  # the separate mariadb container from pre-audit compose has been removed.
   # URL: http://localhost:4280
-  # Default creds: admin / password
+  # Default creds: admin / password  (then click "Create / Reset Database")
   # ──────────────────────────────────────────
   dvwa:
-    image: vulnerables/web-dvwa:latest
+    image: ghcr.io/digininja/dvwa:latest
     container_name: hacklab-dvwa
     ports:
       - "127.0.0.1:4280:80"
     restart: unless-stopped
-    mem_limit: 256m
+    mem_limit: 512m
     networks:
       - hacklab
-    depends_on:
-      - dvwa-db
-
-  dvwa-db:
-    image: mariadb:10
-    container_name: hacklab-dvwa-db
-    environment:
-      MYSQL_ROOT_PASSWORD: dvwa_root_pass
-      MYSQL_DATABASE: dvwa
-      MYSQL_USER: dvwa
-      MYSQL_PASSWORD: dvwa_pass
-    volumes:
-      - dvwa-db-data:/var/lib/mysql
-    mem_limit: 256m
-    networks:
-      - hacklab
-    restart: unless-stopped
 
   # ──────────────────────────────────────────
-  # Metasploit Framework
-  # Full MSF console in a container
+  # Metasploit Framework — full MSF console in a container.
+  # Joined to hacklab-egress so `msfupdate` works without manual network juggling.
   # Access: docker exec -it hacklab-msf msfconsole
   # ──────────────────────────────────────────
   metasploit:
@@ -73,13 +67,15 @@ services:
     tty: true
     networks:
       - hacklab
+      - hacklab-egress
     mem_limit: 1g
     restart: unless-stopped
-    # No ports exposed — access via docker exec
+    # No ports exposed — access only via `docker exec`
 
   # ──────────────────────────────────────────
-  # WebGoat - OWASP teaching platform
+  # WebGoat — OWASP teaching platform.
   # URL: http://localhost:8888/WebGoat
+  # WebWolf (companion): http://localhost:9090
   # ──────────────────────────────────────────
   webgoat:
     image: webgoat/webgoat:latest
@@ -94,14 +90,26 @@ services:
     environment:
       WEBGOAT_PORT: 8080
       WEBWOLF_PORT: 9090
+    # Upstream image declares HEALTHCHECK using `curl` but does not install curl,
+    # so the container flips to "unhealthy" forever with
+    # "/bin/sh: 1: curl: not found". Disable — we don't depend on it.
+    healthcheck:
+      disable: true
 
 networks:
+  # Primary target network. No outbound internet. Targets cannot exfiltrate.
   hacklab:
     driver: bridge
-    internal: false  # Allow outbound for package installs during container init
+    internal: true
     ipam:
       config:
         - subnet: 172.30.0.0/24
 
-volumes:
-  dvwa-db-data:
+  # Egress-allowed sidecar network. Only attach containers that genuinely need
+  # outbound (e.g. msfupdate). Keep this small on purpose.
+  hacklab-egress:
+    driver: bridge
+    internal: false
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24
