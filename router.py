@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import re
+import signal
 import sys
 import threading
 import time
@@ -136,6 +137,8 @@ class RouterState:
         self.recent_errors: deque[float] = deque(maxlen=20)
         # Only ONE heavy request in-flight at a time on an 8GB box.
         self.gen_semaphore = threading.Semaphore(1)
+        self.in_flight: int = 0
+        self._in_flight_lock = threading.Lock()
 
     def record_latency(self, seconds: float) -> None:
         self.recent_latencies.append(seconds)
@@ -380,6 +383,7 @@ def routed_chat(task_type: str, messages: list, system: str) -> tuple[dict, str,
 # HTTP handler
 # ----------------------------------------------------------------------------
 SEMAPHORE_TIMEOUT_SEC = 90
+MAX_BODY_SIZE = 1024 * 1024  # 1 MB — enough for any reasonable prompt on 8GB
 
 
 class RouterHandler(BaseHTTPRequestHandler):
@@ -426,7 +430,7 @@ class RouterHandler(BaseHTTPRequestHandler):
                     "samples": list(STATE.recent_latencies),
                 },
                 "errors_60s": STATE.recent_error_count(),
-                "in_flight": 1 - STATE.gen_semaphore._value,  # approx
+                "in_flight": STATE.in_flight,
                 "ollama_alive": memory_probe.ollama_running(),
             })
         elif self.path == "/models":
@@ -454,6 +458,10 @@ class RouterHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             content_length = int(self.headers.get("Content-Length", 0))
+            if content_length > MAX_BODY_SIZE:
+                self._send_json({"error": "body_too_large",
+                                 "max_bytes": MAX_BODY_SIZE}, 413)
+                return
             body = (json.loads(self.rfile.read(content_length).decode())
                     if content_length else {})
         except (ValueError, json.JSONDecodeError):
@@ -496,6 +504,8 @@ class RouterHandler(BaseHTTPRequestHandler):
             }, 503)
             return
 
+        with STATE._in_flight_lock:
+            STATE.in_flight += 1
         start = time.time()
         try:
             system = body.get("system", BASE_SYSTEM_PROMPT)
@@ -529,14 +539,22 @@ class RouterHandler(BaseHTTPRequestHandler):
                      err=type(e).__name__, msg=str(e)[:160])
             self._send_json({"error": "internal", "type": type(e).__name__}, 500)
         finally:
+            with STATE._in_flight_lock:
+                STATE.in_flight -= 1
             STATE.gen_semaphore.release()
 
     def log_message(self, fmt, *args):
         print(f"[Router] {self.address_string()} - {fmt % args}")
 
 
+def _handle_sigterm(signum, frame):
+    heal_log("router_shutdown", reason="sigterm")
+    sys.exit(0)
+
+
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+    signal.signal(signal.SIGTERM, _handle_sigterm)
 
     # Boot watchdog thread
     t = threading.Thread(target=watchdog_loop, daemon=True, name="watchdog")
