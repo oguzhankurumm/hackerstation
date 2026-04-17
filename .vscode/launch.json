@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Router (router.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/router.py",
+      "args": ["8080"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "ROUTER_HOST": "127.0.0.1",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "justMyCode": true
+    },
+    {
+      "name": "Supervisor (supervisor.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/supervisor.py",
+      "args": ["8080"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": { "PYTHONUNBUFFERED": "1" },
+      "justMyCode": true
+    },
+    {
+      "name": "Memory probe (one-shot)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/memory_probe.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Router + Supervisor",
+      "configurations": ["Router (router.py)", "Supervisor (supervisor.py)"],
+      "stopAll": true
+    }
+  ]
+}

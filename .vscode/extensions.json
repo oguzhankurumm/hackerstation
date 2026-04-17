@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.debugpy",
+    "ms-azuretools.vscode-docker",
+    "redhat.vscode-yaml",
+    "yzhang.markdown-all-in-one",
+    "timonwong.shellcheck",
+    "foxundermoon.shell-format",
+    "tamasfe.even-better-toml"
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "HackerStation: start all",
+      "type": "shell",
+      "command": "./start.sh all",
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: status",
+      "type": "shell",
+      "command": "./start.sh status",
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: stop",
+      "type": "shell",
+      "command": "./start.sh stop",
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: lab up (Docker)",
+      "type": "shell",
+      "command": "./start.sh lab",
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: lab down",
+      "type": "shell",
+      "command": "docker compose -f ${workspaceFolder}/docker-compose.yml down",
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: tail self-heal log",
+      "type": "shell",
+      "command": "tail -f logs/self-heal.log",
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: tail router.log",
+      "type": "shell",
+      "command": "tail -f router.log",
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: health (curl /health)",
+      "type": "shell",
+      "command": "curl -s http://localhost:8080/health | python3 -m json.tool",
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: status (detailed)",
+      "type": "shell",
+      "command": "curl -s http://localhost:8080/status | python3 -m json.tool",
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: rebuild custom Ollama models",
+      "type": "shell",
+      "command": "ollama create hackerstation-code -f Modelfile.qwen-hacker && ollama create hackerstation-reason -f Modelfile.deepseek-hacker",
+      "problemMatcher": []
+    },
+    {
+      "label": "HackerStation: update nuclei templates",
+      "type": "shell",
+      "command": "nuclei -update-templates",
+      "problemMatcher": []
+    }
+  ]
+}
