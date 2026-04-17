@@ -20,6 +20,7 @@ API: http://localhost:8080
 from __future__ import annotations
 
 import json
+import os
 import re
 import signal
 import sys
@@ -27,7 +28,7 @@ import threading
 import time
 from collections import deque
 from datetime import datetime, timezone
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Optional
 from urllib.error import URLError
@@ -108,9 +109,27 @@ def classify_task(prompt: str) -> str:
 
 
 # ----------------------------------------------------------------------------
-# Self-heal log
+# Self-heal log (size-rotated: .log → .log.1 → .log.2 → .log.3; oldest dropped)
 # ----------------------------------------------------------------------------
+MAX_LOG_BYTES = 5 * 1024 * 1024  # 5 MB per file
+LOG_BACKUP_COUNT = 3             # keep 3 historical files
 _log_lock = threading.Lock()
+
+
+def _rotate_if_needed(path: Path,
+                      max_bytes: int = MAX_LOG_BYTES,
+                      backups: int = LOG_BACKUP_COUNT) -> None:
+    try:
+        if not path.exists() or path.stat().st_size <= max_bytes:
+            return
+        for i in range(backups - 1, 0, -1):
+            src = path.parent / f"{path.name}.{i}"
+            dst = path.parent / f"{path.name}.{i+1}"
+            if src.exists():
+                src.replace(dst)
+        path.replace(path.parent / f"{path.name}.1")
+    except OSError:
+        pass
 
 
 def heal_log(event: str, **fields) -> None:
@@ -119,6 +138,7 @@ def heal_log(event: str, **fields) -> None:
     line = f"[{ts}] event={event} {payload}".rstrip() + "\n"
     with _log_lock:
         try:
+            _rotate_if_needed(SELF_HEAL_LOG)
             with SELF_HEAL_LOG.open("a") as f:
                 f.write(line)
         except OSError:
@@ -128,8 +148,12 @@ def heal_log(event: str, **fields) -> None:
 # ----------------------------------------------------------------------------
 # State: SAFE MODE, latency window, concurrency lock
 # ----------------------------------------------------------------------------
+ROUTER_VERSION = "2.0.0"
+
+
 class RouterState:
     def __init__(self) -> None:
+        self.boot_time: float = time.time()
         self.safe_mode = False
         self.safe_mode_entered_at: Optional[float] = None
         self.last_memory_percent: float = 0.0
@@ -380,6 +404,79 @@ def routed_chat(task_type: str, messages: list, system: str) -> tuple[dict, str,
 
 
 # ----------------------------------------------------------------------------
+# Streaming (opt-in via "stream": true in request body)
+# ----------------------------------------------------------------------------
+def _stream_ollama(path: str, payload: dict):
+    """Yield raw NDJSON bytes from Ollama. Raises on connect/HTTP failure
+    BEFORE the first byte — callers can fall back without partial output."""
+    req = Request(
+        f"{OLLAMA_URL}{path}",
+        data=json.dumps(payload).encode(),
+        headers={"Content-Type": "application/json"},
+    )
+    timeout = 120 if STATE.safe_mode else 300
+    with urlopen(req, timeout=timeout) as resp:
+        for raw in resp:
+            if raw:
+                yield raw  # Ollama already includes the trailing \n
+
+
+def routed_stream(task_type: str, *, prompt: str = "", system: str = "",
+                  messages: Optional[list] = None):
+    """Return (generator, meta). The generator yields NDJSON bytes from the
+    chosen model. `meta` is a mutable dict the generator updates before it
+    yields its first byte, so after iteration the caller can read the final
+    model_used + fell_back for the _router trailing record."""
+    primary = MODELS[task_type]
+    fallback = MODELS["coding"]
+    meta = {"model_used": primary, "fell_back": False, "degraded": False}
+    opts = _gen_options(STATE.safe_mode)
+
+    def _payload(model: str):
+        if messages is not None:
+            msgs = list(messages)
+            if not any(m.get("role") == "system" for m in msgs):
+                msgs.insert(0, {"role": "system", "content": _build_system(system)})
+            return "/api/chat", {"model": model, "messages": msgs,
+                                 "stream": True, "options": opts}
+        return "/api/generate", {"model": model, "prompt": prompt,
+                                 "system": _build_system(system),
+                                 "stream": True, "options": opts}
+
+    def _gen():
+        # Primary
+        try:
+            path, payload = _payload(primary)
+            yield from _stream_ollama(path, payload)
+            return
+        except (URLError, TimeoutError, OSError) as e:
+            heal_log("stream_primary_failed", model=primary, err=str(e)[:120])
+        # Fallback to coding model
+        if primary != fallback:
+            meta["model_used"] = fallback
+            meta["fell_back"] = True
+            try:
+                path, payload = _payload(fallback)
+                yield from _stream_ollama(path, payload)
+                return
+            except (URLError, TimeoutError, OSError) as e:
+                heal_log("stream_fallback_failed", model=fallback,
+                         err=str(e)[:120])
+        # Deterministic stub — single line
+        meta["model_used"] = "deterministic-stub"
+        meta["fell_back"] = True
+        meta["degraded"] = True
+        STATE.record_error()
+        stub_prompt = prompt or (
+            messages[-1].get("content", "") if messages else ""
+        )
+        stub = deterministic_fallback(stub_prompt)
+        yield json.dumps(stub).encode() + b"\n"
+
+    return _gen(), meta
+
+
+# ----------------------------------------------------------------------------
 # HTTP handler
 # ----------------------------------------------------------------------------
 SEMAPHORE_TIMEOUT_SEC = 90
@@ -439,18 +536,56 @@ class RouterHandler(BaseHTTPRequestHandler):
                     self._send_json(json.loads(resp.read().decode()))
             except (URLError, TimeoutError, OSError) as e:
                 self._send_json({"error": str(e)}, 502)
+        elif self.path == "/version":
+            ollama_version: Optional[str] = None
+            models_info: list = []
+            try:
+                with urlopen(f"{OLLAMA_URL}/api/version", timeout=3) as resp:
+                    ollama_version = json.loads(resp.read().decode()).get("version")
+            except (URLError, TimeoutError, OSError):
+                pass
+            try:
+                with urlopen(f"{OLLAMA_URL}/api/tags", timeout=3) as resp:
+                    tags = json.loads(resp.read().decode()).get("models", [])
+                    models_info = [
+                        {"name": m.get("name"),
+                         "size_gb": round(m.get("size", 0) / (1024**3), 2)}
+                        for m in tags
+                    ]
+            except (URLError, TimeoutError, OSError):
+                pass
+            self._send_json({
+                "router": {
+                    "version": ROUTER_VERSION,
+                    "pid": os.getpid(),
+                    "uptime_sec": round(time.time() - STATE.boot_time, 1),
+                    "bind_host": os.environ.get("ROUTER_HOST", "127.0.0.1"),
+                    "safe_mode": STATE.safe_mode,
+                },
+                "ollama": {
+                    "version": ollama_version,
+                    "alive": memory_probe.ollama_running(),
+                    "url": OLLAMA_URL,
+                },
+                "models": {
+                    "configured": MODELS,
+                    "installed": models_info,
+                },
+            })
         else:
             self._send_json({
                 "service": "HackerStation AI Router",
-                "version": "2.0.0",
+                "version": ROUTER_VERSION,
                 "endpoints": {
                     "POST /generate": "auto-routed generation (with fallback)",
                     "POST /chat": "auto-routed chat (with fallback)",
                     "POST /generate/coding": "force coding model",
                     "POST /generate/reasoning": "force reasoning model",
+                    "POST * (stream: true)": "opt-in NDJSON streaming passthrough",
                     "GET  /health": "health snapshot",
                     "GET  /status": "detailed runtime + memory state",
                     "GET  /models": "list Ollama models",
+                    "GET  /version": "router + Ollama versions, uptime, PID",
                 },
                 "safe_mode": STATE.safe_mode,
             })
@@ -509,14 +644,55 @@ class RouterHandler(BaseHTTPRequestHandler):
         start = time.time()
         try:
             system = body.get("system", BASE_SYSTEM_PROMPT)
+            stream_mode = bool(body.get("stream"))
+            wants_chat = self.path == "/chat" or "messages" in body
+            messages = body.get("messages", []) if wants_chat else None
+            prompt = body.get("prompt", "") if not wants_chat else ""
 
-            if self.path == "/chat" or "messages" in body:
-                messages = body.get("messages", [])
+            if stream_mode:
+                gen, meta = routed_stream(
+                    task_type, prompt=prompt, system=system, messages=messages
+                )
+                self.send_response(200)
+                self.send_header("Content-Type", "application/x-ndjson")
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                # Chunked transfer: no Content-Length, close when done
+                self.end_headers()
+                client_alive = True
+                try:
+                    for chunk in gen:
+                        self.wfile.write(chunk)
+                        self.wfile.flush()
+                except (BrokenPipeError, ConnectionResetError):
+                    heal_log("stream_client_disconnect", task_type=task_type)
+                    client_alive = False
+                elapsed = time.time() - start
+                STATE.record_latency(elapsed)
+                if client_alive:
+                    trailing = {"_router": {
+                        "task_type": task_type,
+                        "model_used": meta["model_used"],
+                        "fell_back": meta["fell_back"],
+                        "degraded": meta["degraded"],
+                        "safe_mode": STATE.safe_mode,
+                        "elapsed_seconds": round(elapsed, 2),
+                        "memory_percent": STATE.last_memory_percent,
+                    }}
+                    try:
+                        self.wfile.write(
+                            json.dumps(trailing).encode() + b"\n"
+                        )
+                        self.wfile.flush()
+                    except (BrokenPipeError, ConnectionResetError):
+                        pass
+                return
+
+            if wants_chat:
                 result, model_used, fell_back = routed_chat(
                     task_type, messages, system
                 )
             else:
-                prompt = body.get("prompt", "")
                 result, model_used, fell_back = routed_generate(
                     task_type, prompt, system
                 )
@@ -554,16 +730,24 @@ def _handle_sigterm(signum, frame):
 
 def main():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+    # Loopback by default. Set ROUTER_HOST=0.0.0.0 to expose on LAN — only do
+    # that with an auth proxy in front (the custom Modelfiles strip refusals).
+    host = os.environ.get("ROUTER_HOST", "127.0.0.1")
     signal.signal(signal.SIGTERM, _handle_sigterm)
 
     # Boot watchdog thread
     t = threading.Thread(target=watchdog_loop, daemon=True, name="watchdog")
     t.start()
 
-    heal_log("router_boot", port=port, version="2.0.0")
+    heal_log("router_boot", port=port, host=host, version=ROUTER_VERSION)
 
-    server = HTTPServer(("0.0.0.0", port), RouterHandler)
-    print(f"🚀 HackerStation AI Router v2.0 (self-healing) on http://localhost:{port}")
+    # ThreadingHTTPServer so a long streaming POST does not block /health
+    # polls from the supervisor. gen_semaphore(1) still enforces at most one
+    # heavy generation concurrently — threading just lets light GETs in.
+    server = ThreadingHTTPServer((host, port), RouterHandler)
+    bind_label = "localhost" if host in ("127.0.0.1", "::1") else host
+    print(f"🚀 HackerStation AI Router v2.0 (self-healing) on http://{bind_label}:{port}")
+    print(f"   Bound to:        {host}:{port}" + ("  [loopback-only]" if host == "127.0.0.1" else "  [EXPOSED]"))
     print(f"   Coding model:    {MODELS['coding']}")
     print(f"   Reasoning model: {MODELS['reasoning']}")
     print(f"   Ollama backend:  {OLLAMA_URL}")

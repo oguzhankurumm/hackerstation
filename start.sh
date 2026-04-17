@@ -18,6 +18,21 @@ warn() { echo -e "${YELLOW}[!]${NC} $*"; }
 err()  { echo -e "${RED}[✗]${NC} $*"; }
 info() { echo -e "${CYAN}[i]${NC} $*"; }
 
+# rotate_log PATH [MAX_BYTES]
+# If PATH exceeds MAX_BYTES (default 5 MB), rename it to logs/<name>-YYYYMMDD-HHMMSS.log
+# so the caller can open a fresh file. Never fails; silent no-op if PATH missing.
+rotate_log() {
+  local f="$1" max_bytes="${2:-5242880}" size=0
+  [ -f "$f" ] || return 0
+  # BSD stat (macOS) first; fall back to GNU stat for portability.
+  size=$(stat -f%z "$f" 2>/dev/null || stat -c%s "$f" 2>/dev/null || echo 0)
+  if [ "$size" -gt "$max_bytes" ]; then
+    local base
+    base="$(basename "$f" .log)"
+    mv "$f" "$DIR/logs/${base}-$(date +%Y%m%d-%H%M%S).log" 2>/dev/null || true
+  fi
+}
+
 header() {
   echo ""
   echo -e "${CYAN}╔══════════════════════════════════════════╗${NC}"
@@ -55,6 +70,9 @@ start_router() {
     log "AI Router already running on :8080"
   else
     info "Starting AI Router on :8080..."
+    # Rotate pre-existing router.log if it has grown past 5 MB so a fresh
+    # file begins with this boot — prevents the unbounded growth from CRIT-9.
+    rotate_log "$DIR/router.log"
     nohup python3 "$DIR/router.py" >> "$DIR/router.log" 2>&1 &
     sleep 2
     if curl -s http://localhost:8080/health >/dev/null 2>&1; then
@@ -67,28 +85,35 @@ start_router() {
 }
 
 start_supervisor() {
-  if pgrep -f "python3 .*supervisor.py" >/dev/null 2>&1; then
+  # Pattern matches both `python3 supervisor.py` and homebrew's
+  # `.../Python.framework/.../Python supervisor.py` argv forms.
+  if pgrep -f "[Pp]ython.*supervisor\.py" >/dev/null 2>&1; then
     log "Supervisor already running"
     return 0
   fi
   info "Starting self-healing supervisor..."
+  rotate_log "$DIR/logs/supervisor.log"
   nohup python3 "$DIR/supervisor.py" > "$DIR/logs/supervisor.log" 2>&1 &
-  sleep 1
-  if pgrep -f "python3 .*supervisor.py" >/dev/null 2>&1; then
-    log "Supervisor started (PID: $!) — auto-restart + memory watchdog"
-    info "Tail self-heal events: tail -f $DIR/logs/self-heal.log"
-  else
-    err "Supervisor failed to start — check logs/supervisor.log"
-    return 1
-  fi
+  local pid=$!
+  # Poll up to 5s — nohup'd Python can take >1s to reach steady state.
+  for _ in 1 2 3 4 5; do
+    sleep 1
+    if pgrep -f "[Pp]ython.*supervisor\.py" >/dev/null 2>&1; then
+      log "Supervisor started (PID: $pid) — auto-restart + memory watchdog"
+      info "Tail self-heal events: tail -f $DIR/logs/self-heal.log"
+      return 0
+    fi
+  done
+  err "Supervisor failed to start — check logs/supervisor.log"
+  return 1
 }
 
 stop_all() {
   info "Stopping supervisor (so it stops respawning the router)..."
-  pkill -f "python3 .*supervisor.py" 2>/dev/null && log "Supervisor stopped" \
+  pkill -f "[Pp]ython.*supervisor\.py" 2>/dev/null && log "Supervisor stopped" \
     || warn "No supervisor running"
   info "Stopping router..."
-  pkill -f "python3 .*router.py" 2>/dev/null && log "Router stopped" \
+  pkill -f "[Pp]ython.*router\.py" 2>/dev/null && log "Router stopped" \
     || warn "No router running"
 }
 
@@ -100,9 +125,12 @@ start_lab() {
   info "Starting security lab containers..."
   docker compose -f "$DIR/docker-compose.yml" up -d 2>&1
   log "Lab containers started"
-  echo "    → Juice Shop:  http://localhost:3000"
-  echo "    → DVWA:        http://localhost:4280  (admin/password)"
-  echo "    → WebGoat:     http://localhost:8888/WebGoat"
+  # internal:true on hacklab disables the Docker bridge gateway, so the
+  # compose `ports:` entries are inert on stock Docker. OrbStack routes
+  # to containers via its own tun + .orb.local DNS, which IS how to reach them.
+  echo "    → Juice Shop:  http://hacklab-juiceshop.orb.local/"
+  echo "    → DVWA:        http://hacklab-dvwa.orb.local/         (admin/password → click \"Create / Reset Database\")"
+  echo "    → WebGoat:     http://hacklab-webgoat.orb.local/WebGoat/"
   echo "    → Metasploit:  docker exec -it hacklab-msf msfconsole"
 }
 
